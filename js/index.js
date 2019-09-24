@@ -3,14 +3,16 @@ let validateEmail = document.querySelector("#email");
 let validatePassword = document.querySelector("#password");
 let validateRetypedPassword = document.querySelector("#repassword");
 let submitButton = document.querySelector("#submit-button");
-let holdPassword = 0;
+const form = document.querySelector('#register-form');
+let username; 
+let email;
+let password = 0;
+
 let verifyUsername = false;
 let verifyEmail = false;
 let verifyPassword = false;
 let verifyRetypedPassword = false;
 
-let username; 
-let email;
 
 
 validateUsername.addEventListener("input", function (e) {
@@ -19,6 +21,7 @@ validateUsername.addEventListener("input", function (e) {
         console.log(e.target.value);
         validateUsername.removeAttribute("style");
         verifyUsername = true;
+        username = e.target.value;
         document.querySelector(".username").style.visibility = "hidden";
     } else {
         validateUsername.setAttribute("style", "border: 2px solid red;");
@@ -35,6 +38,7 @@ validateEmail.addEventListener("input", function (e) {
         validateEmail.removeAttribute("style");
         document.querySelector(".email").style.visibility = "hidden";
         verifyEmail = true;
+        email = e.target.value;
     } else {
         validateEmail.setAttribute("style", "border: 2px solid red;");
         verifyEmail = false;
@@ -46,7 +50,7 @@ validateEmail.addEventListener("input", function (e) {
 
 validatePassword.addEventListener("input", function (e) {
     let letter = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*])[a-zA-Z0-9!@#$%&*]{6,15}$/;
-    holdPassword = e.target.value;
+    password = e.target.value;
     if (e.target.value.match(letter)) {
         console.log(e.target.value);
         validatePassword.removeAttribute("style");
@@ -64,7 +68,7 @@ validatePassword.addEventListener("input", function (e) {
 validateRetypedPassword.addEventListener("input", function (e) {
     let letter = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*])[a-zA-Z0-9!@#$%&*]{6,15}$/;
 
-    if (e.target.value.match(letter) && e.target.value === holdPassword) {
+    if (e.target.value.match(letter) && e.target.value === password) {
         console.log(e.target.value);
         validateRetypedPassword.removeAttribute("style");
         verifyRetypedPassword = true;
@@ -92,7 +96,7 @@ function drawBorder(e) {
     }
 }
 
-submitButton.addEventListener("click", function(e){
+/* submitButton.addEventListener("click", function(e){
     e.preventDefault();
-    openDB();
-});
+    openDB(username, email, password);
+}); */
