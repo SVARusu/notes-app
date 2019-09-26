@@ -1,9 +1,14 @@
-
+*{
+  margin: 0;
+  padding: 0;
+}
 /* #username{
     width: 400px;
 } */
-.register{
+.register, .login{
     margin-top: 10%;
+    padding-right: 0;
+    padding-left: 0
 }
 
 /* ///////////////// TOOTLTIP ///////////////// */
@@ -31,4 +36,8 @@
     border-width: 5px;
     border-style: solid;
     border-color: red transparent transparent transparent;
+  }
+
+  #error-message{
+    color: red;
   }
