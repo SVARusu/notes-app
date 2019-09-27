@@ -1,11 +1,12 @@
-let validateUsername: Element = document.querySelector("#username") as HTMLElement;
-let validateEmail: Element = document.querySelector("#email") as HTMLElement;
-let validatePassword: Element = document.querySelector("#password") as HTMLElement;
-let validateRetypedPassword: Element = document.querySelector("#repassword") as HTMLElement;
-let submitButton: Element = document.querySelector("#submit-button") as HTMLElement;
-const form: Element = document.querySelector('#register-form') as HTMLElement;
-let username: string;
-let email: string;
+import { DB } from './db';
+const db = new DB();
+let validateUsername: HTMLInputElement = document.querySelector("#username") as HTMLInputElement;
+let validateEmail: HTMLInputElement = document.querySelector("#email") as HTMLInputElement;
+let validatePassword: HTMLInputElement = document.querySelector("#password") as HTMLInputElement;
+let validateRetypedPassword: HTMLInputElement = document.querySelector("#repassword") as HTMLInputElement;
+const form: HTMLFormElement = document.querySelector('#register-form') as HTMLFormElement;
+// let username: string;
+// let email: string;
 let password: string = '';
 
 let verifyUsername: boolean = false;
@@ -18,10 +19,9 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
         let letter = /^[A-Za-z0-9][A-Za-z0-9\.]{6,15}$/;
         let value = (<HTMLInputElement>e.target).value;
         if (value.match(letter)) {
-            console.log(value);
             validateUsername.removeAttribute("style");
             verifyUsername = true;
-            username = value;
+            //username = value;
             (<HTMLInputElement>document.querySelector(".username")).style.visibility = "hidden";
         } else {
             validateUsername.setAttribute("style", "border: 2px solid red;");
@@ -40,7 +40,7 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
             validateEmail.removeAttribute("style");
             (<HTMLInputElement>document.querySelector(".email")).style.visibility = "hidden";
             verifyEmail = true;
-            email = value;
+            //email = value;
         } else {
             validateEmail.setAttribute("style", "border: 2px solid red;");
             verifyEmail = false;
@@ -100,10 +100,24 @@ function drawBorder(e: Event) {
         (<HTMLInputElement>document.querySelector("#submit-button")).disabled = true;
     }
 }
+if (form) {
+    form.addEventListener("submit", (e: Event) => {
+        e.preventDefault();
+        db.addUser(validateUsername.value, validateEmail.value, validatePassword.value)
+            .then(() => {
+                // User added
+                console.log("user added");
+                
+            })
+            .catch (() => {
+
+            });
+    });
+}
 
 /* submitButton.addEventListener("click", function(e){
     e.preventDefault();
     openDB(username, email, password);
 }); */
 
-export { form, validateEmail, validatePassword, validateUsername };
+//export { form, validateEmail, validatePassword, validateUsername };
