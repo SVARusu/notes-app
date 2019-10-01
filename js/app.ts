@@ -1,6 +1,6 @@
 console.log("something else");
 
 import './db';
+import './registerpage';
 import './index';
-import './loginpage';
 import './notespage';

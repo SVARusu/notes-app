@@ -9,13 +9,20 @@
     margin-top: 10%;
     padding-right: 0;
     padding-left: 0;
-    
+}
+.note-checkbox{
+  margin-top: 10px;
+  transform: scale(1.5);
+   
 }
 
+.completed-todos, .completed-todos-title{
+  display: none;
+}
 /* ///////////////// TOOTLTIP ///////////////// */
 .tooltiptext {
     visibility: hidden;
-    width: 150px;
+    width: 200px;
     background-color: red;
     color: #fff;
     text-align: center;

@@ -1,30 +1,20 @@
-import { rejects } from "assert";
-
-//import { form, validateEmail, validatePassword, validateUsername } from './index';
-//import { notesForm, newNote, notesList } from './notespage';
-window.onload = function () {
-
-    // if (form) form.addEventListener("submit", addData);
-    // if (notesForm) notesForm.addEventListener("submit", addNewNote);
-}
-
+import { printEveryTodo } from './notespage';
+let cursorValue: string[] = [];
 class DB {
 
     private db: IDBDatabase;
     constructor() {
         this.db = <IDBDatabase>{};
-        let request = window.indexedDB.open('notes_db', 3);
-        console.log("yes");
+        let request = window.indexedDB.open('notes_db', 5);
         request.onerror = function (e: Event) {
             console.log("e.target.result");
         }
         request.onsuccess = () => {
             this.db = request.result;
-            console.log(this.db);
             //if (notesForm) this.printTodos();
         }
 
-        request.onupgradeneeded = function (e) {
+        request.onupgradeneeded = function (e: any) {
             let db = (e.target as IDBOpenDBRequest).result;
             if (e.oldVersion < 2) {
                 let objectStore = db.createObjectStore('user', { keyPath: 'id', autoIncrement: true });
@@ -32,6 +22,7 @@ class DB {
                 objectStore.createIndex('username', 'username', { unique: false });
                 objectStore.createIndex('email', 'email', { unique: false });
                 objectStore.createIndex('password', 'password', { unique: false });
+                //objectStore.createIndex('completed', 'completed', { unique: false });
                 objectStore.transaction.oncomplete = function (e: Event) {
                     // Store values in the newly created objectStore.
                     console.log('Database setup complete');
@@ -41,6 +32,21 @@ class DB {
                 let objectStore2 = db.createObjectStore('todos', { keyPath: 'id', autoIncrement: true });
                 objectStore2.createIndex('todo', 'todo', { unique: false });
                 objectStore2.createIndex('loggedUser', 'loggedUser', { unique: false });
+            }
+            if (e.oldVersion < 4) {
+                let objectStore3 = db.createObjectStore('finished-todos', { keyPath: 'id', autoIncrement: true });
+                objectStore3.createIndex('todo', 'todo', { unique: false });
+                objectStore3.createIndex('loggedUser', 'loggedUser', { unique: false });
+            }
+            if (e.oldVersion < 5) {
+
+                //let objectStore = db.createObjectStore('user', { keyPath: 'id', autoIncrement: true });
+                let objectStore = e.target.transaction.objectStore("todos");
+                objectStore.createIndex('completed', 'completed', { unique: false });
+                objectStore.transaction.oncomplete = function (e: Event) {
+                    // Store values in the newly created objectStore.
+                    console.log('Database setup complete');
+                };
             }
             console.log('Database setup complete');
         }
@@ -68,18 +74,6 @@ class DB {
         });
     }
     /* ///////////////////////////////// ADD A NEW USER /////////////////////////////// */
-    // (e: Event) {
-    //     e.preventDefault();
-
-
-    //     let transaction = this.db.transaction(['user'], 'readwrite');
-    //     let objectStore = transaction.objectStore('user');
-    //     this.promisedAddUser(objectStore)
-    //         .then(function (found) {
-
-    //         })
-
-    // }
 
     userExists = (objectStore: any, username: string) => {
         return new Promise((resolve, reject) => {
@@ -134,7 +128,7 @@ class DB {
 
     /* ///////////////////////////////// ADD A NEW NOTE /////////////////////////////// */
     addNewNote(newNote: string) {
-        let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser") }
+        let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser"), completed: false }
         let transaction = this.db.transaction(['todos'], "readwrite");
         let objectStore = transaction.objectStore('todos');
         if (newNote !== '') {
@@ -151,11 +145,8 @@ class DB {
 
     printTodos() {
         return new Promise((resolve, reject) => {
-            // console.log(notesList);
-            console.log(this.db);
             let db;
-            console.log(this.db);
-            let request = window.indexedDB.open('notes_db', 3);
+            let request = window.indexedDB.open('notes_db', 5);
             request.onsuccess = () => {
                 db = request.result;
                 //console.log(this.db);
@@ -164,25 +155,113 @@ class DB {
                 // //let objectStore: IDBObjectStore = this.db.transaction('todos').objectStore('todos');
                 // let objectStore = transaction.objectStore('todos');
                 let objectStore = db.transaction('todos').objectStore('todos');
-                let allTodos: string[] = []
+                let allTodos: any = [];
                 objectStore.openCursor().onsuccess = function (e: any) {
                     let cursor = e.target.result as IDBCursorWithValue;
-                    console.log(cursor);
                     if (cursor) {
-                        if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser) {
-                            allTodos.push(cursor.value.todo);
-                            
+                        if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser && cursor.value.completed === false) {
+                            allTodos.push(cursor.value);
+                            cursorValue.push(cursor.value.id);
+
                         }
                         cursor.continue();
                     } else {
                         resolve(allTodos);
-                        console.log('All todos displayed');
+                        console.log(allTodos);
                     }
                 }
 
             }
         })
     }
+
+
+    printCompletedTodos() {
+        return new Promise((resolve, reject) => {
+            let db;
+            let request = window.indexedDB.open('notes_db', 5);
+            request.onsuccess = () => {
+                db = request.result;
+                let objectStore = db.transaction('todos').objectStore('todos');
+                let completedTodos: any = [];
+                objectStore.openCursor().onsuccess = function (e: any) {
+                    let cursor = e.target.result as IDBCursorWithValue;
+                    if (cursor) {
+                        if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser && cursor.value.completed === true) {
+                            completedTodos.push(cursor.value);
+                        }
+                        cursor.continue();
+                    } else {
+                        resolve(completedTodos);
+                    }
+
+                }
+            }
+        });
+    }
+
+    markCompletedNote = (e: Event) => {
+        let todoId = Number((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
+        console.log(todoId);
+        let db: IDBDatabase;
+        let request = window.indexedDB.open('notes_db', 5);
+
+        request.onsuccess = () => {
+            if ((<HTMLInputElement>e.target).checked === true) {
+                console.log((<HTMLInputElement>e.target).checked);
+
+                db = request.result;
+                let transaction = db.transaction(['todos'], "readwrite");
+                let objectStore = transaction.objectStore('todos');
+                //let objectStore2 = db.transaction('finished-todos');
+                objectStore.openCursor().onsuccess = (e: any) => {
+                    let cursor = e.target.result as IDBCursorWithValue;
+                    if (cursor) {
+                        if (cursor.value.id === todoId) {
+                            console.log(cursor.value);
+                            let data = cursor.value;
+                            data.completed = true;
+                            let requestUpdate = objectStore.put(data);
+                            const CreateDB = new DB;
+                            printEveryTodo(CreateDB);
+
+                            console.log(cursor.value.completed);
+                        }
+                        cursor.continue();
+
+                    }
+
+                }
+            } else if ((<HTMLInputElement>e.target).checked === false) {
+                console.log(todoId);
+
+                db = request.result;
+                let transaction = db.transaction(['todos'], "readwrite");
+                let objectStore = transaction.objectStore('todos');
+                //let objectStore2 = db.transaction('finished-todos');
+                objectStore.openCursor().onsuccess = (e: any) => {
+                    let cursor = e.target.result as IDBCursorWithValue;
+                    if (cursor) {
+                        if (cursor.value.id === todoId) {
+                            console.log(cursor.value);
+                            let data = cursor.value;
+                            data.completed = false;
+                            let requestUpdate = objectStore.put(data);
+                            const CreateDB = new DB;
+                            printEveryTodo(CreateDB);
+
+                            console.log(cursor.value.completed);
+                        }
+                        cursor.continue();
+
+                    }
+
+                }
+            }
+
+
+        }
+    }
 }
 
-export { DB };
+export { DB, cursorValue };
