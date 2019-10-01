@@ -15,7 +15,9 @@
   transform: scale(1.5);
    
 }
-
+.some-width{
+  width: 500px;
+}
 .completed-todos, .completed-todos-title{
   display: none;
 }
@@ -48,4 +50,8 @@
 
   #error-message{
     color: red;
+  }
+
+  #completed-note-list{
+    text-decoration: line-through;
   }

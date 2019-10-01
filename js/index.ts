@@ -8,7 +8,7 @@ let loginForm: HTMLFormElement = document.querySelector("#login-form") as HTMLFo
 const db = new DB();
 if (loginForm && loginUsername && loginPassword) {
     console.log("lol");
-    
+
     loginForm.addEventListener('submit', (e: Event) => {
         e.preventDefault();
         db.loginUser(loginUsername.value, loginPassword.value)
@@ -16,7 +16,12 @@ if (loginForm && loginUsername && loginPassword) {
                 console.log(window.location);
                 let location = window.location.href;
                 //location = location.replace("index.html", "notes.html");
-                location = location + "/notes.html";
+                //location = location + "/notes.html";
+                if (location.includes("index.html")) {
+                    location = location.replace("index.html", "notes.html");
+                } else {
+                    location = location + "/notes.html";
+                }
                 window.location.href = location;
             })
             .catch((error) => {
@@ -27,9 +32,9 @@ if (loginForm && loginUsername && loginPassword) {
             });
 
     });
-}else{
+} else {
     console.log("lol nice try lmao");
-    
+
 }
 
 // export { loginForm, loginUsername, loginPassword };

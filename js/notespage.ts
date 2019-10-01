@@ -1,4 +1,4 @@
-import { DB, cursorValue } from './db';
+import { DB } from './db';
 
 
 let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInputElement;
@@ -15,13 +15,13 @@ if (notesForm) {
 }
 
 function init() {
-    viewUncompletedTodos.addEventListener("click", function(){
+    viewUncompletedTodos.addEventListener("click", function () {
         (<HTMLInputElement>document.querySelector('.completed-todos')).style.display = "none";
         (<HTMLInputElement>document.querySelector('.completed-todos-title')).style.display = "none";
         (<HTMLInputElement>document.querySelector('.uncompleted-todos')).style.display = "contents";
         (<HTMLInputElement>document.querySelector('.uncompleted-todos-title')).style.display = "contents";
     });
-    viewCompletedTodos.addEventListener("click", function(){
+    viewCompletedTodos.addEventListener("click", function () {
         (<HTMLInputElement>document.querySelector('.uncompleted-todos')).style.display = "none";
         (<HTMLInputElement>document.querySelector('.uncompleted-todos-title')).style.display = "none";
         (<HTMLInputElement>document.querySelector('.completed-todos')).style.display = "contents";
@@ -39,69 +39,70 @@ function init() {
 }
 
 function printEveryTodo(db: any) {
-    db.printTodos()
-        .then((allTodos: any) => {
-            while (notesList.firstChild) {
-                notesList.removeChild(notesList.firstChild as ChildNode);
-            }
-            if (allTodos) {
-                for (let i = 0; i < allTodos.length; i++) {
-                    let listItem = document.createElement("li");
-                    let checkBox = document.createElement("input")
-                    let par = document.createElement("p");
-                    //btn.textContent = "x";
-                    checkBox.setAttribute("type", "checkbox");
-                    checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
-                    checkBox.onclick = db.markCompletedNote;
-                    par.textContent = allTodos[i].todo;
-                    listItem.appendChild(par);
-                    listItem.appendChild(checkBox);
-
-                    listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
-                    //listItem.textContent = db.markCompletedNote
-                    listItem.setAttribute('data-note-id', allTodos[i].id);
+    function printToDos() {
+        db.printTodos()
+            .then((allTodos: any) => {
+                let isChecked = false
+                while (notesList.firstChild) {
+                    notesList.removeChild(notesList.firstChild as ChildNode);
+                }
+                if (allTodos) {
+                    addTodosToForm(allTodos, notesList, isChecked)
+                }
+                if (!notesList.firstChild) {
+                    let listItem = document.createElement('li');
+                    listItem.textContent = "No todos stored";
                     notesList.appendChild(listItem);
                 }
-            }
-            if (!notesList.firstChild) {
-                let listItem = document.createElement('li');
-                listItem.textContent = "No todos stored";
-                notesList.appendChild(listItem);
-            }
-        });
+            });
 
-    db.printCompletedTodos()
-        .then((completedTodos: any) => {
-            while (completedNotesList.firstChild) {
-                completedNotesList.removeChild(completedNotesList.firstChild as ChildNode);
-            }
-            for (let i = 0; i < completedTodos.length; i++) {
-                let listItem = document.createElement("li");
-                let checkBox = document.createElement("input")
-                let par = document.createElement("p");
-                let del = document.createElement("del");
-                
-                //btn.textContent = "x";
-                checkBox.setAttribute("type", "checkbox");
-                checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+        db.printCompletedTodos()
+            .then((completedTodos: any) => {
+                let isChecked = true;
+                while (completedNotesList.firstChild) {
+                    completedNotesList.removeChild(completedNotesList.firstChild as ChildNode);
+                }
+                addTodosToForm(completedTodos, completedNotesList, isChecked)
+                if (!completedNotesList.firstChild) {
+                    let listItem = document.createElement('li');
+                    listItem.textContent = "No todos completed";
+                    completedNotesList.appendChild(listItem);
+                }
+            })
+        }
+
+    function markCompletedNote(e: Event) {
+        let todoId = Number((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
+        let checked = (<HTMLInputElement>e.target).checked;
+        db.markCompletedNote(todoId, checked)
+            .then(() => {
+                printToDos();
+            });
+    }    
+
+    function addTodosToForm(todos: any, list: HTMLElement, isChecked: boolean) {
+        for (let i = 0; i < todos.length; i++) {
+            let listItem = document.createElement("li");
+            let checkBox = document.createElement("input")
+            let par = document.createElement("p");
+            //btn.textContent = "x";
+            checkBox.setAttribute("type", "checkbox");
+            checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+            if (isChecked) {
                 checkBox.checked = true;
-                checkBox.onclick = db.markCompletedNote;
-                del.textContent = completedTodos[i].todo;
-                par.appendChild(del);
-                listItem.appendChild(par);
-                listItem.appendChild(checkBox);
-                listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
-                listItem.setAttribute('data-note-id', completedTodos[i].id);
-                //listItem.textContent = db.markCompletedNote
-                //listItem.setAttribute('data-note-id', cursorValue[i]);
-                completedNotesList.appendChild(listItem);
             }
-            if (!completedNotesList.firstChild) {
-                let listItem = document.createElement('li');
-                listItem.textContent = "No todos completed";
-                completedNotesList.appendChild(listItem);
-            }
-        })
+            checkBox.onclick = markCompletedNote;
+            par.textContent = todos[i].todo;
+            listItem.appendChild(par);
+            listItem.appendChild(checkBox);
+            listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
+            listItem.setAttribute('data-note-id', todos[i].id);
+            //listItem.textContent = db.markCompletedNote
+            //listItem.setAttribute('data-note-id', cursorValue[i]);
+            list.appendChild(listItem);
+        }
+    }
+    printToDos();
 }
 
 export { printEveryTodo };

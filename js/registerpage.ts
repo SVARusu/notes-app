@@ -1,5 +1,4 @@
 import { DB } from './db';
-import { LOADIPHLPAPI } from 'dns';
 const db = new DB();
 let validateUsername: HTMLInputElement = document.querySelector("#username") as HTMLInputElement;
 let validateEmail: HTMLInputElement = document.querySelector("#email") as HTMLInputElement;
