@@ -1,15 +1,30 @@
-
+*{
+  margin: 0;
+  padding: 0;
+}
 /* #username{
     width: 400px;
 } */
-.register{
+.register, .login{
     margin-top: 10%;
+    padding-right: 0;
+    padding-left: 0;
 }
-
+.note-checkbox{
+  margin-top: 10px;
+  transform: scale(1.5);
+   
+}
+.some-width{
+  width: 500px;
+}
+.completed-todos, .completed-todos-title{
+  display: none;
+}
 /* ///////////////// TOOTLTIP ///////////////// */
 .tooltiptext {
     visibility: hidden;
-    width: 150px;
+    width: 200px;
     background-color: red;
     color: #fff;
     text-align: center;
@@ -31,4 +46,12 @@
     border-width: 5px;
     border-style: solid;
     border-color: red transparent transparent transparent;
+  }
+
+  #error-message{
+    color: red;
+  }
+
+  #completed-note-list{
+    text-decoration: line-through;
   }

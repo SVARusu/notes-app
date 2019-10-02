@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="css/style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container register">
+        <div class="card bg-light">
+            <article class="card-body mx-auto some-width">
+                <h4 class="card-title mt-3 text-center">Create a new account</h4>
+                <form action="" id="register-form">
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-user"></i></span>
+                        </div>
+                        <input type="text" id="username" class="form-control" placeholder="Enter your Username">
+                        <span class="tooltiptext username">Invalid username</span>
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-envelope"></i></span>
+                        </div>
+                        <input type="email" id="email" class="form-control" placeholder="Enter your Email">
+                        <span class="tooltiptext email">Invalid email address</span>
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-key"></i></span>
+                        </div>
+                        <input type="password" id="password" class="form-control" placeholder="Enter your Password">
+                        <span class="tooltiptext password">Invalid password</span>
+                    </div>
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-key"></i></span>
+                        </div>
+                        <input type="password" id="repassword" class="form-control" placeholder="Confirm Password">
+                        <span class="tooltiptext password2">Password doesn't match</span>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block" disabled id="submit-button"> Create Account </button>
+                    </div>
+                    <p class="text-center">Have an account? <a href="index.html">Log In</a> </p>
+                </form>
+            </article>
+        </div>
+    </div>
+
+    <script src="bundle.js"></script>
+
+</body>
+
+</html>
