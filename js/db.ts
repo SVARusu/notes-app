@@ -1,3 +1,6 @@
+import { resolve } from "path";
+import { rejects } from "assert";
+import { cursorTo } from "readline";
 
 class DB {
 
@@ -9,7 +12,7 @@ class DB {
     }
 
     init() {
-        this.openedDB = window.indexedDB.open('notes_db', 8);
+        this.openedDB = window.indexedDB.open('notes_db', 11);
         this.openedDB.onerror = this.onDatabaseError;
         this.openedDB.onsuccess = this.onDatabaseSuccess;
         this.openedDB.onupgradeneeded = this.onDatabaseUpgradeNeeded;
@@ -80,6 +83,20 @@ class DB {
                 // Store values in the newly created objectStore.
                 console.log('Database setup complete');
             };
+        }
+        if (e.oldVersion < 9) {
+            let objectStore = e.target.transaction.objectStore('todos');
+            objectStore.createIndex('dueDate', 'dueDate', { unique: false });
+            objectStore.transaction.complete = function (e: Event) {
+                console.log('Database setup complete');
+            }
+        }
+        if (e.oldVersion < 11) {
+            let objectStore = e.target.transaction.objectStore('todos');
+            objectStore.createIndex('dueDate', 'dueDate', { unique: false });
+            objectStore.transaction.complete = function (e: Event) {
+                console.log('Database setup complete');
+            }
         }
         console.log('Database setup complete');
     }
@@ -159,8 +176,8 @@ class DB {
     }
 
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
-    addNewNote(newNote: string, category: string, color: any) {
-        let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser"), category: category, color: color, completed: false }
+    addNewNote(newNote: string, category: string, color: any, newDate: string) {
+        let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser"), category: category, color: color, dueDate: newDate, completed: false }
         let transaction = this.db.transaction(['todos'], "readwrite");
         let objectStore = transaction.objectStore('todos');
         if (newNote !== '') {
@@ -214,16 +231,25 @@ class DB {
             }
         });
     }
-    printTodosByCategory = (category: string) => {
+    printTodosByCategory = (category: string, date: any) => {
         return new Promise((resolve, reject) => {
+            console.log(typeof date[0]);
             let objectStore = this.db.transaction('todos').objectStore('todos');
             let todosByCategory: any = [];
             objectStore.openCursor().onsuccess = (e: any) => {
                 let cursor = e.target.result as IDBCursorWithValue;
+                // console.log(date.includes(cursor.value.dueDate));
                 if (cursor) {
-                    if (cursor.value.category === category) {
+                    if (cursor.value.category === category && date.includes(cursor.value.dueDate)) {
                         todosByCategory.push(cursor.value);
-                    } else if (category === 'Display all todos') {
+                    }
+                    if (cursor.value.category === category && date === 'Display all todos') {
+                        todosByCategory.push(cursor.value);
+                    }
+                    if (category === 'Display all todos' && date.includes(cursor.value.dueDate)) {
+                        todosByCategory.push(cursor.value);
+                    }
+                    if (category === 'Display all todos' && date === 'Display all todos') {
                         todosByCategory.push(cursor.value);
                     }
                     cursor.continue();
@@ -299,6 +325,71 @@ class DB {
                     }
 
                 })
+        });
+    }
+
+    editCategory = (newCatName: string, currentCategory: string) => {
+        return new Promise((resolve, reject) => {
+            let transaction = this.db.transaction(['categories'], 'readwrite');
+            let objectStore = transaction.objectStore('categories');
+            objectStore.openCursor().onsuccess = (e: any) => {
+                let cursor = e.target.result as IDBCursorWithValue;
+                if (cursor) {
+                    if (cursor.value.category === currentCategory) {
+                        let secondTransaction = this.db.transaction(['todos'], 'readwrite');
+                        let secondObjectStore = secondTransaction.objectStore('todos');
+                        secondObjectStore.openCursor().onsuccess = (e: any) => {
+                            let cursor = e.target.result as IDBCursorWithValue;
+                            if (cursor) {
+                                if (cursor.value.category === currentCategory) {
+                                    let data = cursor.value;
+                                    data.category = newCatName;
+                                    let requestUpdate = secondObjectStore.put(data);
+                                }
+                                cursor.continue();
+                            }
+                        }
+                        let data = cursor.value;
+                        data.category = newCatName;
+                        let requestUpdate = objectStore.put(data);
+                    }
+                    cursor.continue();
+                } else {
+                    resolve();
+                }
+            }
+        })
+    }
+
+    removeCategory = (catId: number, catName: any) => {
+        return new Promise((resolve, rejects) => {
+            let transaction = this.db.transaction(['categories'], 'readwrite');
+            let objectStore = transaction.objectStore('categories');
+            console.log(objectStore.name);
+            let request = objectStore.delete(catId);
+            transaction.oncomplete = () => {
+                console.log("category removed");
+                let transaction = this.db.transaction(['todos'], 'readwrite');
+                let objectStore = transaction.objectStore('todos');
+                objectStore.openCursor().onsuccess = (e: any) => {
+                    let cursor = e.target.result as IDBCursorWithValue;
+                    if (cursor) {
+                        //console.log(cursor.value.category);
+                        if (cursor.value.category == catName) {
+
+                            let data = cursor.value;
+                            data.category = 'default';
+                            data.color = 'white'
+                            console.log(data);
+                            let requestUpdate = objectStore.put(data);
+                        }
+                        cursor.continue()
+                    } else {
+                        resolve();
+                    }
+                }
+
+            }
         });
     }
 

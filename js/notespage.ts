@@ -1,8 +1,10 @@
 import { DB } from './db';
+import { EPERM } from 'constants';
 
 const db = new DB();
 
 let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInputElement;
+let newDate: HTMLInputElement = document.querySelector('#new-date') as HTMLInputElement;
 let notesForm: HTMLFormElement = document.querySelector("#note-form") as HTMLFormElement;
 let notesList: HTMLElement = document.querySelector("#note-list") as HTMLElement;
 let completedNotesList: HTMLElement = document.querySelector("#completed-note-list") as HTMLElement;
@@ -15,6 +17,7 @@ let pickedColor: HTMLInputElement = document.querySelector("#picked-color") as H
 let filterByCategory: HTMLSelectElement = document.querySelector("#filter-todos") as HTMLSelectElement;
 let modalCategoryList: HTMLElement = document.querySelector("#category-list") as HTMLElement;
 let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElement;
+let filterByDate: HTMLSelectElement = document.querySelector("#filter-by-date") as HTMLSelectElement;
 
 console.log(notesForm);
 if (notesForm) {
@@ -44,7 +47,7 @@ function init() {
         (<HTMLInputElement>document.querySelector('.completed-todos')).style.display = "contents";
         (<HTMLInputElement>document.querySelector('.completed-todos-title')).style.display = "contents";
     });
-    logOut.addEventListener('click', function(){
+    logOut.addEventListener('click', function () {
         sessionStorage.setItem("loggedUser", '');
         let location = window.location.href;
         location = location.replace("notes.html", "")
@@ -54,11 +57,13 @@ function init() {
     notesForm.addEventListener("submit", (e: Event) => {
         e.preventDefault();
         if (selectedCategory.value !== "Select a category" && newNote.value !== '') {
-            console.log(selectedCategory.options[selectedCategory.selectedIndex].style.background);
+            let date = new Date(newDate.value);
+            console.log(Date.now());
             let color = selectedCategory.options[selectedCategory.selectedIndex].style.background;
-            db.addNewNote(newNote.value, selectedCategory.value, color)
+            db.addNewNote(newNote.value, selectedCategory.value, color, newDate.value)
             printEveryTodo();
             newNote.value = "";
+            newDate.value = "";
         }
     });
     newCategoryFrom.addEventListener("submit", function (e: Event) {
@@ -71,8 +76,6 @@ function init() {
                 printEveryTodo();
             });
     });
-
-
 }
 
 function printEveryTodo() {
@@ -94,20 +97,22 @@ function printEveryTodo() {
                 let isChecked = true;
                 addTodosToForm(completedTodos, completedNotesList, isChecked);
             })
-        /* //////////////////////////Display the categories in the select menu ////////////////////////////// */
-        db.printCategories()
-            .then((allCategories: any) => {
-                let defaultFilter: boolean = false;
-                displayCategories(allCategories, selectedCategory, defaultFilter);
-            });
-        db.printCategories()
-            .then((allCategories: any) => {
-                let defaultFilter: boolean = true;
-                displayCategories(allCategories, filterByCategory, defaultFilter);
-            })
+        /* //////////////////////////Display the categories in the select menus ////////////////////////////// */
+        // db.printCategories()
+        //     .then((allCategories: any) => {
+        //         let defaultFilter: boolean = false;
+        //         displayCategories(allCategories, selectedCategory, defaultFilter);
+        //     });
+        // db.printCategories()
+        //     .then((allCategories: any) => {
+        //         let defaultFilter: boolean = true;
+        //         displayCategories(allCategories, filterByCategory, defaultFilter);
+        //     })
         /* //////////////////////////Display the categories in the modal ////////////////////////////// */
         db.printCategories()
             .then((allCategories: any) => {
+                displayCategories(allCategories, selectedCategory, false);
+                displayCategories(allCategories, filterByCategory, true);
                 while (modalCategoryList.firstChild) {
                     modalCategoryList.removeChild(modalCategoryList.firstChild as ChildNode);
                 }
@@ -117,8 +122,10 @@ function printEveryTodo() {
                     let button = document.createElement('button');
                     p.textContent = category.category;
                     p.setAttribute('class', 'my-auto');
+                    p.onclick = convertPar;
                     button.textContent = 'x';
                     button.setAttribute('class', 'btn btn-danger');
+                    button.onclick = deleteCategory;
                     listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
                     listItem.appendChild(p);
                     listItem.appendChild(button);
@@ -127,14 +134,38 @@ function printEveryTodo() {
 
                 });
             })
-    }   
+    }
     /* //////////////////////////Filter and display todos by category////////////////////////////// */
     filterByCategory.addEventListener('change', (e: Event) => {
-        specificTodos()
+        specificTodos();
+    });
+
+    filterByDate.addEventListener('change', () => {
+        specificTodos();
     });
 
     function specificTodos() {
-        db.printTodosByCategory(filterByCategory.value)
+        let date: any = [];
+        if (filterByDate.value === 'Today') {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            let currDate = yyyy + '-' + mm + '-' + dd;
+            date.push(currDate)
+        } else if (filterByDate.value === 'This week') {
+            let curr = new Date();
+            for (let i = 1; i <= 7; i++) {
+                let first = curr.getDate() - curr.getDay() + i
+                let day = new Date(curr.setDate(first)).toISOString().slice(0, 10)
+                date.push(day)
+            }
+        } else {
+            date = filterByDate.value;
+            console.log(date);
+            
+        }
+        db.printTodosByCategory(filterByCategory.value, date)
             .then((todosByCategory: any) => {
                 let completedTodos: any[] = [];
                 let uncompletedTodos: any[] = [];
@@ -156,14 +187,50 @@ function printEveryTodo() {
     }
     /* //////////////////////////Call this function when a todo checkbox is checked ////////////////////////////// */
     function markCompletedNote(e: Event) {
-        let todoId = Number((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
+        let todoId = Number((<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).getAttribute('data-note-id'));
         let checked = (<HTMLInputElement>e.target).checked;
         db.markCompletedNote(todoId, checked)
             .then(() => {
                 specificTodos();
             });
     }
-/* //////////////////////////Display the categories in the dropdown////////////////////////////// */
+    /* //////////////////////////Remove a category////////////////////////////// */
+    function deleteCategory(e: Event) {
+        console.log(((<HTMLElement>(<HTMLElement>e.target).parentNode).childNodes[0]).textContent);
+        let catName = ((<HTMLElement>(<HTMLElement>e.target).parentNode).childNodes[0]).textContent;
+        let catId: number = Number((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
+        db.removeCategory(catId, catName)
+            .then(() => {
+                printEveryTodo();
+            })
+
+    }
+
+    function convertPar(e: Event) {
+        let par: any = e.target;
+        let currentCategory = par.textContent;
+        let input: HTMLInputElement = document.createElement('input');
+        input.value = par.textContent;
+        console.log(input.value);
+        par.replaceWith(input);
+        input.addEventListener('blur', function (e: any) {
+            // if (e.currentTarget.dataset.triggered) return;
+            // e.currentTarget.dataset.triggered = true;
+            db.editCategory(e.target.value, currentCategory)
+                .then(() => {
+                    let p = document.createElement('p');
+                    p.textContent = e.target.value;
+                    p.setAttribute('class', 'my-auto');
+                    p.onclick = convertPar;
+                    e.target.replaceWith(p);
+                    printEveryTodo();
+                })
+
+            //alert('clicked');
+        });
+
+    }
+    /* //////////////////////////Display the categories in the dropdown////////////////////////////// */
     function displayCategories(categories: any, placeToBeDisplayed: HTMLSelectElement, defaultFilter: boolean) {
         while (placeToBeDisplayed.firstChild) {
             placeToBeDisplayed.removeChild(placeToBeDisplayed.firstChild as ChildNode);
@@ -189,7 +256,7 @@ function printEveryTodo() {
             placeToBeDisplayed.appendChild(option);
         }
     }
-/* //////////////////////////Prin the todos on the page////////////////////////////// */
+    /* //////////////////////////Prin the todos on the page////////////////////////////// */
     function addTodosToForm(todos: any, list: HTMLElement, isChecked: boolean) {
         while (list.firstChild) {
             list.removeChild(list.firstChild as ChildNode);
@@ -198,6 +265,8 @@ function printEveryTodo() {
             let listItem = document.createElement("li");
             let checkBox = document.createElement("input");
             let par = document.createElement("p");
+            let date = document.createElement('p');
+            let div = document.createElement('div')
             //btn.textContent = "x";
             checkBox.setAttribute("type", "checkbox");
             checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
@@ -206,8 +275,16 @@ function printEveryTodo() {
             }
             checkBox.onclick = markCompletedNote;
             par.textContent = todos[i].todo;
+            par.setAttribute('class', 'my-auto')
+            date.textContent = "Due date: " + todos[i].dueDate;
+            date.setAttribute('class', 'my-auto mr-4')
+            div.appendChild(date);
+            div.appendChild(checkBox);
+            div.setAttribute("class", "d-flex justify-content-between");
             listItem.appendChild(par);
-            listItem.appendChild(checkBox);
+            listItem.appendChild(div);
+            // listItem.appendChild(date);
+            // listItem.appendChild(checkBox);
             listItem.style.background = todos[i].color;
             listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
             listItem.setAttribute('data-note-id', todos[i].id);
