@@ -1,5 +1,5 @@
 import { DB } from './db';
-import { EPERM } from 'constants';
+
 
 const db = new DB();
 
@@ -18,6 +18,9 @@ let filterByCategory: HTMLSelectElement = document.querySelector("#filter-todos"
 let modalCategoryList: HTMLElement = document.querySelector("#category-list") as HTMLElement;
 let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElement;
 let filterByDate: HTMLSelectElement = document.querySelector("#filter-by-date") as HTMLSelectElement;
+let rangeForm = document.querySelector("#date-range-form") as HTMLFormElement;
+let startDate = document.querySelector("#start-date") as HTMLInputElement;
+let endDate = document.querySelector("#end-date") as HTMLInputElement;
 
 console.log(notesForm);
 if (notesForm) {
@@ -56,9 +59,7 @@ function init() {
     printEveryTodo();
     notesForm.addEventListener("submit", (e: Event) => {
         e.preventDefault();
-        if (selectedCategory.value !== "Select a category" && newNote.value !== '') {
-            let date = new Date(newDate.value);
-            console.log(Date.now());
+        if (Number(selectedCategory.value) !== 0 && newNote.value !== '' && newDate.value !== '') {
             let color = selectedCategory.options[selectedCategory.selectedIndex].style.background;
             db.addNewNote(newNote.value, selectedCategory.value, color, newDate.value)
             printEveryTodo();
@@ -84,7 +85,6 @@ function printEveryTodo() {
         db.printTodos()
             .then((allTodos: any) => {
                 allTodos.sort(compare);
-                console.log(allTodos);
                 let isChecked = false
                 if (allTodos) {
                     addTodosToForm(allTodos, notesList, isChecked);
@@ -122,7 +122,7 @@ function printEveryTodo() {
                     let button = document.createElement('button');
                     p.textContent = category.category;
                     p.setAttribute('class', 'my-auto');
-                    p.onclick = convertPar;
+                    p.onclick = convertPToInput;
                     button.textContent = 'x';
                     button.setAttribute('class', 'btn btn-danger');
                     button.onclick = deleteCategory;
@@ -144,16 +144,15 @@ function printEveryTodo() {
         specificTodos();
     });
 
+    rangeForm.addEventListener('change', function () {
+        specificTodos();
+    });
     function specificTodos() {
         let date: any = [];
-        if (filterByDate.value === 'Today') {
-            var today = new Date();
-            var dd = String(today.getDate()).padStart(2, '0');
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var yyyy = today.getFullYear();
-            let currDate = yyyy + '-' + mm + '-' + dd;
+        if (Number(filterByDate.value) === 1) {
+            let currDate = getCurrentDate();
             date.push(currDate)
-        } else if (filterByDate.value === 'This week') {
+        } else if (Number(filterByDate.value) === 2) {
             let curr = new Date();
             for (let i = 1; i <= 7; i++) {
                 let first = curr.getDate() - curr.getDay() + i
@@ -161,29 +160,33 @@ function printEveryTodo() {
                 date.push(day)
             }
         } else {
-            date = filterByDate.value;
-            console.log(date);
-            
+            date.push(Number(filterByDate.value));
         }
-        db.printTodosByCategory(filterByCategory.value, date)
-            .then((todosByCategory: any) => {
-                let completedTodos: any[] = [];
-                let uncompletedTodos: any[] = [];
-                todosByCategory.forEach((todo: any) => {
-                    console.log(todo.completed);
-                    if (todo.completed) {
-                        completedTodos.push(todo);
-                    } else {
-                        uncompletedTodos.push(todo);
-                    }
-                });
-                uncompletedTodos.sort(compare);
-                completedTodos.sort(compare);
-                console.log(completedTodos, uncompletedTodos);
-                addTodosToForm(uncompletedTodos, notesList, false)
-                addTodosToForm(completedTodos, completedNotesList, true)
-            })
 
+        if (startDate.value !== '' && endDate.value !== '' && Number(new Date(endDate.value)) < Number(new Date(startDate.value))) {
+            let p = document.querySelector("#filter-by-date-range-error") as HTMLElement;
+            p.textContent = "The end date is smaller than the start date";
+            p.style.color = 'red';
+        } else {
+            (<HTMLElement>document.querySelector("#filter-by-date-range-error")).textContent = ''
+            db.printTodosByCategory(filterByCategory.value, date, startDate.value, endDate.value)
+                .then((todosByCategory: any) => {
+                    let completedTodos: any[] = [];
+                    let uncompletedTodos: any[] = [];
+                    todosByCategory.forEach((todo: any) => {
+                        if (todo.completed) {
+                            completedTodos.push(todo);
+                        } else {
+                            uncompletedTodos.push(todo);
+                        }
+                    });
+                    uncompletedTodos.sort(compare);
+                    completedTodos.sort(compare);
+                    console.log(completedTodos, uncompletedTodos);
+                    addTodosToForm(uncompletedTodos, notesList, false)
+                    addTodosToForm(completedTodos, completedNotesList, true)
+                })
+        }
     }
     /* //////////////////////////Call this function when a todo checkbox is checked ////////////////////////////// */
     function markCompletedNote(e: Event) {
@@ -206,13 +209,13 @@ function printEveryTodo() {
 
     }
 
-    function convertPar(e: Event) {
-        let par: any = e.target;
-        let currentCategory = par.textContent;
+    function convertPToInput(e: Event) {
+        let p: any = e.target;
+        let currentCategory = p.textContent;
         let input: HTMLInputElement = document.createElement('input');
-        input.value = par.textContent;
+        input.value = p.textContent;
         console.log(input.value);
-        par.replaceWith(input);
+        p.replaceWith(input);
         input.addEventListener('blur', function (e: any) {
             // if (e.currentTarget.dataset.triggered) return;
             // e.currentTarget.dataset.triggered = true;
@@ -221,7 +224,7 @@ function printEveryTodo() {
                     let p = document.createElement('p');
                     p.textContent = e.target.value;
                     p.setAttribute('class', 'my-auto');
-                    p.onclick = convertPar;
+                    p.onclick = convertPToInput;
                     e.target.replaceWith(p);
                     printEveryTodo();
                 })
@@ -237,12 +240,13 @@ function printEveryTodo() {
         }
 
         if (defaultFilter) {
-            let displayAll = document.createElement('option');
+            let displayAll: any = document.createElement('option');
             displayAll.textContent = 'Display all todos';
             placeToBeDisplayed.appendChild(displayAll);
         } else {
-            let firstOption = document.createElement('option');
+            let firstOption: any = document.createElement('option');
             firstOption.textContent = 'Select a category';
+            firstOption.value = 0;
             // firstOption.setAttribute("disabled selected", "disabled selected");
             firstOption.selected = true;
             firstOption.disabled = true;
@@ -306,6 +310,15 @@ function printEveryTodo() {
             return 1;
         }
         return 0;
+    }
+
+    function getCurrentDate() {
+        let today = new Date();
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let yyyy = today.getFullYear();
+        let currDate = yyyy + '-' + mm + '-' + dd;
+        return currDate;
     }
     printToDos();
 
