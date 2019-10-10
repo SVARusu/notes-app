@@ -231,26 +231,39 @@ class DB {
             }
         });
     }
-    printTodosByCategory = (category: string, date: any) => {
+    printTodosByCategory = (category: string, date: any, startDate: any, endDate: any) => {
         return new Promise((resolve, reject) => {
-            console.log(typeof date[0]);
             let objectStore = this.db.transaction('todos').objectStore('todos');
             let todosByCategory: any = [];
             objectStore.openCursor().onsuccess = (e: any) => {
                 let cursor = e.target.result as IDBCursorWithValue;
-                // console.log(date.includes(cursor.value.dueDate));
                 if (cursor) {
-                    if (cursor.value.category === category && date.includes(cursor.value.dueDate)) {
-                        todosByCategory.push(cursor.value);
-                    }
-                    if (cursor.value.category === category && date === 'Display all todos') {
-                        todosByCategory.push(cursor.value);
-                    }
-                    if (category === 'Display all todos' && date.includes(cursor.value.dueDate)) {
-                        todosByCategory.push(cursor.value);
-                    }
-                    if (category === 'Display all todos' && date === 'Display all todos') {
-                        todosByCategory.push(cursor.value);
+                    if (startDate !== '' && endDate !== '') {
+                        if (cursor.value.category === category && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (cursor.value.category === category && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (category === 'Display all todos' && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (category === 'Display all todos' && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
+                            todosByCategory.push(cursor.value);
+                        }
+                    } else {
+                        if (cursor.value.category === category && date.includes(cursor.value.dueDate)) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (cursor.value.category === category && date[0] === 0) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (category === 'Display all todos' && date.includes(cursor.value.dueDate)) {
+                            todosByCategory.push(cursor.value);
+                        }
+                        if (category === 'Display all todos' && date[0] === 0) {
+                            todosByCategory.push(cursor.value);
+                        }
                     }
                     cursor.continue();
                 } else {
