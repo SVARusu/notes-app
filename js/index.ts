@@ -18,8 +18,8 @@ async function init() {
       e.preventDefault();
       // db.loginUser(loginUsername.value, loginPassword.value)
       db.loginUserM('marcel', 'marcelaa')
-        .then((resp) => {
-          if (resp === true) {
+        .then((verdict) => {
+          if (verdict === true) {
             console.log(window.location);
             let location = window.location.href;
             //location = location.replace("index.html", "notes.html");
