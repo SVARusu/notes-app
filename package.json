@@ -26,7 +26,7 @@
     "webpack-dev-server": "^3.8.2"
   },
   "dependencies": {
-    "mongodb-stitch-browser-sdk": "^4.5.0"
+    "mongodb-stitch-browser-sdk": "^4.5.0",
     "underscore": "^1.9.1"
   }
 }
