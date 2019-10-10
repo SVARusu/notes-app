@@ -21,9 +21,9 @@
     <title>Document</title>
 </head>
 
-<body>
+<body class="notes-body">
     <nav class="navbar navbar-expand-xl navbar-dark bg-dark mb-3">
-        <div class="container">
+        <div class="container ">
             <a href="" class="navbar-brand">Todos</a>
 
             <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
@@ -40,12 +40,16 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" id="" data-toggle="modal" data-target="#exampleModalCenter">Categories</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></a>
+                    </li>
 
                     <li class="nav-item"></li>
                 </ul>
             </div>
         </div>
     </nav>
+
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -57,16 +61,32 @@
                 </div>
 
                 <div class="modal-body">
-                    <h5 class="text-left mb-3">Create a new category:</h5>
-                    <form action="" class="form-row mb-3">
-                        <div class="form-group input-group col-md-8">
-                            <input type="text" class="form-control">
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mt-3">Create a new category</h5>
+                        <form action="" id="create-category-form">
+                            <div class="form-group">
+                                <label for="new-category">Enter category name</label>
+                                <input type="text" id="new-category" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="picked-color">Pick a color for the category</label>
+                                <input type="color" id="picked-color" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block" id="submit-category-button"> Create category </button>
+                            </div>
+                        </form>
+                    </article>
+                    <hr>
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mb-3">Edit categories</h5>
+                        <div class="mx-auto">
+                            <ul class="list-group" id="category-list">
+                                
+                            </ul>
                         </div>
-                        <div class="form-group col-md-4">
-                            <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Create category</button>
-                        </div>
-                    </form>
-                    <h5 class="text-left mb-3">Create a new category:</h5>
+                    </article>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -78,24 +98,22 @@
 
 
 
-    <div class="container">
+    <div class="container  mb-5">
         <div class="row bg-light pt-3 mb-5">
-            <div class="col-sm-8 col-md-8 col-lg-9 col-xl-10">
+            <div class="col-sm-8 col-md-8 col-lg-8 col-xl-10">
                 <form action="" id="note-form" class="form-row">
-                    <div class="form-group input-group col-md-8 col-sm-8">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-list-ul"></i></span>
-                        </div>
+                    <div class="form-group input-group col-md-6 col-sm-8">
+                        
                         <input type="text" class="form-control" id="new-note">
                     </div>
-                    <div class="form-group input-group col-md-4 col-sm-4">
-                        <select class="form-control" id="sel1">
-                            <option value="" disabled selected>Select a category</option>
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
+                    <div class="form-group input-group col-md-3 col-sm-4">
+                        <select class="form-control" id="selected-category">
+
                         </select>
+                    </div>
+                    <div class="form-group input-group col-md-3 col-sm-3">
+            
+                        <input type="date" class="form-control" id="new-date">
                     </div>
                 </form>
 
@@ -108,7 +126,36 @@
         </div>
         <div class="row uncompleted-todos-title">
             <div class="col-sm-4">
-                <h4 class="text-center">Your todos</h4>
+                <h4 class="">Your todos</h4>
+            </div>
+        </div>
+        <div class="row  completed-todos-title">
+            <div class="col-sm-4">
+                <h4 class="">Your completed todos</h4>
+            </div>
+        </div>
+        <div class="row my-5">
+            <div class="col-sm-12 col-md-6 col-lg-4">
+                <form action="" class="">
+                    <div class="form-group ">
+                        <label for="filter-todos">Group todos by category </label>
+                        <select class="form-control" id="filter-todos">
+
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-4">
+                <form action="" class="">
+                    <div class="form-group ">
+                        <label for="filter-todos">Group by due date </label>
+                        <select class="form-control" id="filter-by-date">
+                            <option>Display all todos</option>
+                            <option>Today</option>
+                            <option>This week</option>
+                        </select>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="row uncompleted-todos">
@@ -118,11 +165,7 @@
                 </ul>
             </div>
         </div>
-        <div class="row  completed-todos-title">
-            <div class="col-sm-4">
-                <h4 class="text-center">Your completed todos</h4>
-            </div>
-        </div>
+
         <div class="row mt-3 completed-todos">
             <div class="col-sm-10  mx-auto">
                 <ul class="list-group" id="completed-note-list">
@@ -135,7 +178,7 @@
 
 
 
-    <script src="bundle.js"></script>
+    <!-- <script src="bundle.js"></script> -->
 </body>
 
 </html>
