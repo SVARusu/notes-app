@@ -5,23 +5,29 @@
 /* #username{
     width: 400px;
 } */
+/* ///////////////// COMMON STUFF ///////////////// */
 .register, .login{
     margin-top: 10%;
     padding-right: 0;
     padding-left: 0;
 }
+.some-width{
+  width: 500px;
+}
+
+/* ///////////////// NOTES PAGES ///////////////// */
 .note-checkbox{
   margin-top: 10px;
   transform: scale(1.5);
    
 }
-.some-width{
-  width: 500px;
+.notes-body{
+  display: none;
 }
 .completed-todos, .completed-todos-title{
   display: none;
 }
-/* ///////////////// TOOTLTIP ///////////////// */
+/* ///////////////// TOOTLTIP FOR REGISTER PAGE ///////////////// */
 .tooltiptext {
     visibility: hidden;
     width: 200px;

@@ -1,5 +1,6 @@
 import { DB } from './db';
 const db = new DB();
+
 let validateUsername: HTMLInputElement = document.querySelector("#username") as HTMLInputElement;
 let validateEmail: HTMLInputElement = document.querySelector("#email") as HTMLInputElement;
 let validatePassword: HTMLInputElement = document.querySelector("#password") as HTMLInputElement;
@@ -70,7 +71,7 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
     });
 
     validateRetypedPassword.addEventListener("input", matchPassword);
-    
+
     function matchPassword() {
         let letter = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*])[a-zA-Z0-9!@#$%&*]{6,15}$/;
         let value = (<HTMLInputElement>document.querySelector("#repassword")).value;
@@ -86,7 +87,7 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
             console.log(verifyRetypedPassword);
             (<HTMLInputElement>document.querySelector(".password2")).style.visibility = "visible";
         }
-        
+
     };
 
     validateUsername.addEventListener("blur", drawBorder);
@@ -110,11 +111,16 @@ if (form) {
         e.preventDefault();
         db.addUser(validateUsername.value, validateEmail.value, validatePassword.value)
             .then(() => {
+                validateUsername.value = '';
+                validateEmail.value = '';
+                validatePassword.value = '';
+                validateRetypedPassword.value = '';
+
                 // User added
                 console.log("user added");
-                
+
             })
-            .catch (() => {
+            .catch(() => {
 
             });
     });
