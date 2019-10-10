@@ -1,14 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+        integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
     <link rel="stylesheet" href="css/style.css">
     <title>Document</title>
 </head>
+
 <body>
-    
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Categories</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mt-3">Create a new category</h5>
+                        <form action="" id="create-category-form">
+                            <div class="form-group">
+                                <label for="new-category">Enter category name</label>
+                                <input type="text" id="new-category" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="picked-color">Pick a color for the category</label>
+                                <input type="color" id="picked-color" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block" id="submit-category-button"> Create category </button>
+                            </div>
+                        </form>
+                    </article>
+                    <hr>
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mb-3">Edit categories</h5>
+                        <div class="mx-auto">
+                            <ul class="list-group" id="category-list">
+
+                            </ul>
+                        </div>
+                    </article>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <nav class="sidebar">
+                    <div class="navbar-header mb-5">
+                        <h2>ToDo App</h2>
+                    </div>
+                    <ul class="list-unstyled components">
+                        <h5>Filter by</h5>
+                        <li>
+                            <ul class="list-unstyled mb-3">
+                                <p>Status</p>
+                                <li class="d-flex">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <span class="my-auto">Completed</span>
+                                </li>
+                            </ul>
+
+                            <ul class="unstyled-list mb-3">
+                                <p>Date</p>
+                                <li class="d-flex">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <span class="my-auto">Today</span>
+                                </li>
+                                <li class="d-flex">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <span class="my-auto">This Week</span>
+                                </li>
+                                <li class="d-flex">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <input type="text" placeholder="dd/mm/yyyy - dd/mm/yyyy" class="" style="width: 100%" id="date-picker">
+                                </li>
+                            </ul>
+                            <ul class="unstyled-list mb-3 cat-list">
+                                <div class="d-flex justify-content-between">
+                                    <span>Categories</span>
+                                    <button class="btn btn-primary text-sm-center" data-toggle="modal" data-target="#exampleModalCenter" id="manage-category-button">Manage</button>
+                                </div>
+
+                                <li class="">
+                                    
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <span class="checkmark">Cat1</span>
+                                    
+                                    
+                                </li>
+                                <li class="">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <label class="my-auto">Cat2</label>
+                                </li>
+                                <li class="list-item">
+                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <label class="my-auto">Cat3</label>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-md-9">
+                <div class="col-md-12 mb-5 ">
+                    <button href="" class="nav-link btn pull-right" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
+                </div>
+                <div class="col-sm-8 col-md-8 col-lg-8 col-xl-12">
+                    <form action="" id="note-form" class="form-row">
+                        <div class="form-group col-md-12 col-sm-12">
+                            <label for="new-note">Todo description</label>
+                            <input type="text" class="form-control" id="new-note" placeholder="ToDo description">
+                        </div>
+                        <div class="col-md-12">
+                            <p>Category</p>
+                        </div>
+                        <div class="form-group input-group col-md-4 col-sm-4">
+                            <select class="form-control" id="selected-category">
+
+                            </select>
+                        </div>
+
+                        <div class="form-group input-group col-md-4 col-sm-4">
+
+                            <input type="text" class="form-control" id="new-date" placeholder="dd/mm/yyyy">
+                        </div>
+                        <div class="form-group col-md-4 col-sm-4">
+                            <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-12">
+                    <h4 class="">Your todos</h4>
+                    <p>to be added</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
