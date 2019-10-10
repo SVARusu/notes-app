@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+        integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Document</title>
+</head>
+
+<body class="">
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark mb-3">
+        <div class="container ">
+            <a href="" class="navbar-brand">Todos</a>
+
+            <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navbarNav" class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <button href="" class="nav-link btn" id="view-uncompleted-todos">View your todos</button>
+                    </li>
+                    <li class="nav-item">
+                        <button href="" class="nav-link btn" id="view-completed-todos">Completed todos</button>
+                    </li>
+                    <li class="nav-item">
+                        <button href="" class="nav-link btn" id="" data-toggle="modal" data-target="#exampleModalCenter">Categories</button>
+                    </li>
+                    <li class="nav-item">
+                        <button href="" class="nav-link btn" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
+                    </li>
+
+                    <li class="nav-item"></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Categories</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mt-3">Create a new category</h5>
+                        <form action="" id="create-category-form">
+                            <div class="form-group">
+                                <label for="new-category">Enter category name</label>
+                                <input type="text" id="new-category" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="picked-color">Pick a color for the category</label>
+                                <input type="color" id="picked-color" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block" id="submit-category-button"> Create category </button>
+                            </div>
+                        </form>
+                    </article>
+                    <hr>
+                    <article class="card-body mx-auto mb-3">
+                        <h5 class="card-title mb-3">Edit categories</h5>
+                        <div class="mx-auto">
+                            <ul class="list-group" id="category-list">
+
+                            </ul>
+                        </div>
+                    </article>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container  mb-5">
+        <div class="row bg-light pt-3 mb-5">
+            <div class="col-sm-8 col-md-8 col-lg-8 col-xl-10">
+                <form action="" id="note-form" class="form-row">
+                    <div class="form-group input-group col-md-6 col-sm-8">
+
+                        <input type="text" class="form-control" id="new-note">
+                    </div>
+                    <div class="form-group input-group col-md-3 col-sm-4">
+                        <select class="form-control" id="selected-category">
+
+                        </select>
+                    </div>
+                    <div class="form-group input-group col-md-3 col-sm-3">
+
+                        <input type="date" class="form-control" id="new-date">
+                    </div>
+                </form>
+
+            </div>
+            <div class="col-sm-4 col-md-4 col-lg-3 col-xl-2">
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
+                </div>
+            </div>
+        </div>
+        <div class="row uncompleted-todos-title">
+            <div class="col-sm-4">
+                <h4 class="">Your todos</h4>
+            </div>
+        </div>
+        <div class="row  completed-todos-title">
+            <div class="col-sm-4">
+                <h4 class="">Your completed todos</h4>
+            </div>
+        </div>
+        <div class="row my-2">
+            <div class="col-sm-12 col-md-6 col-lg-4">
+                <form action="" class="">
+                    <div class="form-group ">
+                        <label for="filter-todos">Group todos by category </label>
+                        <select class="form-control" id="filter-todos">
+
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-4">
+                <form action="" class="">
+                    <div class="form-group ">
+                        <label for="filter-todos">Group by due date </label>
+                        <select class="form-control" id="filter-by-date">
+                            <option value=0>Display all todos</option>
+                            <option value=1>Today</option>
+                            <option value=2>This week</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row mb-5">
+            <div class="col-sm-10 col-md-10 col-lg-10">
+                <label for="start-date" class="mr-2">Filter by date range</label>
+                <form action="" class="form-inline" id="date-range-form">
+                    <label for="start-date" class="mr-2">Start date</label>
+                    <input type="date" name="" id="start-date" class="form-control mr-2">
+
+                    <label for="end-date" class="mr-2">End date</label>
+                    <input type="date" name="" id="end-date" class="form-control mr-2">
+                </form>
+                <p id="filter-by-date-range-error"></p>
+            </div>
+
+        </div>
+        <div class="row uncompleted-todos">
+            <div class="col-sm-10  mx-auto">
+                <ul class="list-group" id="note-list">
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="row mt-3 completed-todos">
+            <div class="col-sm-10  mx-auto">
+                <ul class="list-group" id="completed-note-list">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- <script src="bundle.js"></script> -->
+</body>
+
+</html>
