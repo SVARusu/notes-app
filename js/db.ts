@@ -58,8 +58,7 @@ class DB {
     };
   }
 
-  // mongoDB implementation
-  userExistsM = async (username: string) => {
+  userExists = async (username: string) => {
     const query = { "username": { "$eq": username } };
     const options = { "limit": 1 };
     const user = await users.find(query, options).first();
@@ -70,17 +69,17 @@ class DB {
     return true;
   }
 
-  getUserM = async (username: string) => {
+  getUser = async (username: string) => {
     const query = { "username": { "$eq": username } };
     const options = { "limit": 1 };
     return await users.find(query, options).first();
   }
 
-  loginUserM = async (username: string, password: string) => {
-    const exists: any = await this.userExistsM(username);
+  loginUser = async (username: string, password: string) => {
+    const exists: any = await this.userExists(username);
 
     if (exists) {
-      const user: any = await this.getUserM(username);
+      const user: any = await this.getUser(username);
       if (user.password === password) {
         sessionStorage.setItem('loggedUser', user._id.toString());
         return true;
@@ -92,53 +91,6 @@ class DB {
       console.log(`user ${username} does not exist in database`);
       return false;
     }
-  }
-  // ---------
-
-  loginUser(username: string, password: string) {
-    let transaction = this.db.transaction(['user'], "readwrite");
-    let objectStore = transaction.objectStore('user');
-    return new Promise((resolve, rejects) => {
-      let found = false;
-      objectStore.openCursor().onsuccess = function (e: any) {
-        let cursor = e.target.result as IDBCursorWithValue;
-        if (cursor) {
-          if (username === cursor.value.username && password === cursor.value.password) {
-            found = true;
-            sessionStorage.setItem("loggedUser", username);
-            resolve(found);
-          } else {
-            cursor.continue();
-          }
-        } else {
-          throw ("Cursor doesn't exists");
-        }
-      }
-    });
-  }
-  /* ///////////////////////////////// ADD A NEW USER /////////////////////////////// */
-
-  userExists = (objectStore: any, username: string) => {
-    return new Promise((resolve, reject) => {
-      let found = false;
-      objectStore.openCursor().onsuccess = function (e: any) {
-        let cursor = e.target.result as IDBCursorWithValue;
-        console.log(e);
-        if (cursor) {
-          console.log(cursor.value.username);
-
-          if (username !== cursor.value.username) {
-            found = false;
-            cursor.continue();;
-          } else {
-            found = true;
-            console.log("user already exists");
-          }
-        } else {
-          resolve(found);
-        }
-      }
-    });
   }
 
   /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
@@ -158,27 +110,27 @@ class DB {
     }
   }
 
-    addUser(username: string, email: string, password: string) {
-        let found: boolean = false;
-        let newUser = { username: username, password: password, email: email };
-        const query = { "username": username }
-        return new Promise((resolve, reject) => {
-            users.findOne(query)
-                .then(result => {
-                    let user: any = result
-                    if (result) {
-                        resolve();
-                    } else {
-                        console.log("No document matches the provided query.")
-                        users.insertOne(newUser)
-                            .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
-                            .catch(err => console.error(`Failed to insert item: ${err}`))
-                    }
-                })
-                .catch(err => console.error(`Failed to find document: ${err}`))
+  addUser(username: string, email: string, password: string) {
+    let found: boolean = false;
+    let newUser = { username: username, password: password, email: email };
+    const query = { "username": username }
+    return new Promise((resolve, reject) => {
+      users.findOne(query)
+        .then(result => {
+          let user: any = result
+          if (result) {
+            resolve();
+          } else {
+            console.log("No document matches the provided query.")
+            users.insertOne(newUser)
+              .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
+              .catch(err => console.error(`Failed to insert item: ${err}`))
+          }
         })
+        .catch(err => console.error(`Failed to find document: ${err}`))
+    })
 
-    }
+  }
 
   /* ///////////////////////////////// PRINT TODOS /////////////////////////////// */
   printTodos() {
