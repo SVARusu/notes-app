@@ -72,14 +72,17 @@
 }
 #date-picker{
   border: 1px solid rgb(199, 198, 198);
+  text-align: center;
 }
 input::-webkit-input-placeholder {
   text-align: center;
 }
+/* ??????????????????????? CHECKBOX STYLE ????????????????????????? */
 .cat-list{
   list-style: none;
 }
-/* .cat-list label {
+
+.cat-list label {
   display: block;
   position: relative;
   padding-left: 35px;
@@ -94,16 +97,18 @@ input::-webkit-input-placeholder {
   position: absolute;
   top: 0;
   left: 0;
-  height: 15px;
-  width: 15px;
-  background-color: #eee;
+  height: 20px;
+  width: 20px;
+  border: 1px solid black;
 }
 .cat-list label:hover input ~ .checkmark{
   background-color: #ccc;
 }
 .cat-list label input:checked ~ .checkmark {
-  background-color: #2196F3;
+  
   border-radius: 50%;
+  border: 1px solid black;
+  
 }
 .checkmark:after {
   content: "";
@@ -112,13 +117,14 @@ input::-webkit-input-placeholder {
 }
 .cat-list label input:checked ~ .checkmark:after {
   display: block;
+ 
 }
 .checkmark:after {
-  left: 9px;
-  top: 5px;
-  width: 20px;
-  height: 10px;
-  border: solid white;
+  left: 5px;
+  /* top: 10px; */
+  width: 9px;
+  height: 16px;
+  border: solid rgb(0, 0, 0);
   border-width: 0 3px 3px 0;
   transform: rotate(45deg);
 }
@@ -128,11 +134,15 @@ input[type="checkbox"] {
   cursor: pointer;
   height: 0;
   width: 0;
-} */
+}
 
 #manage-category-button{
   padding: 0;
   font-size: 14px;
   width: 70px;
   
+}
+
+.range-label, .range-input{
+  width: 100%;
 }

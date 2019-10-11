@@ -16,6 +16,7 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="./Lightpick-master/css/lightpick.css">
     <title>Document</title>
 </head>
 
@@ -77,47 +78,66 @@
                         <li>
                             <ul class="list-unstyled mb-3">
                                 <p>Status</p>
-                                <li class="d-flex">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <span class="my-auto">Completed</span>
+                                <li class="d-flex cat-list">
+                                    <label class="">Completed
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="checkmark"></span>
+                                    </label>
+
                                 </li>
                             </ul>
 
-                            <ul class="unstyled-list mb-3">
+                            <ul class="unstyled-list mb-3 cat-list">
                                 <p>Date</p>
                                 <li class="d-flex">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <span class="my-auto">Today</span>
+                                    <label class="">Today
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="my-auto">Today</span>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    
                                 </li>
                                 <li class="d-flex">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <span class="my-auto">This Week</span>
+                                    <label class="">
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="my-auto">This Week</span>
+                                        <span class="checkmark"></span>
+                                    </label>
                                 </li>
                                 <li class="d-flex">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <input type="text" placeholder="dd/mm/yyyy - dd/mm/yyyy" class="" style="width: 100%" id="date-picker">
+                                    <label class="range-label">
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <input type="text" class="range-input" id="date-picker"placeholder="dd/mm/yyyy - dd/mm/yyyy">
+                                        <span class="checkmark"></span>
+                                    </label>
                                 </li>
                             </ul>
                             <ul class="unstyled-list mb-3 cat-list">
                                 <div class="d-flex justify-content-between">
                                     <span>Categories</span>
-                                    <button class="btn btn-primary text-sm-center" data-toggle="modal" data-target="#exampleModalCenter" id="manage-category-button">Manage</button>
+                                    <button class="btn btn-primary text-sm-center" data-toggle="modal" data-target="#exampleModalCenter"
+                                        id="manage-category-button">Manage</button>
                                 </div>
 
                                 <li class="">
-                                    
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <span class="checkmark">Cat1</span>
-                                    
-                                    
+                                    <label class="">Cat1
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="checkmark"></span>
+                                    </label>
+
+
                                 </li>
                                 <li class="">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <label class="my-auto">Cat2</label>
+                                    <label class="container">Cat3
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="checkmark"></span>
+                                    </label>
                                 </li>
                                 <li class="list-item">
-                                    <input type="checkbox" name="" id="" class="my-auto mr-2">
-                                    <label class="my-auto">Cat3</label>
+                                    <label class="container">Cat3
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="checkmark"></span>
+                                    </label>
                                 </li>
                             </ul>
                         </li>
@@ -145,7 +165,7 @@
 
                         <div class="form-group input-group col-md-4 col-sm-4">
 
-                            <input type="text" class="form-control" id="new-date" placeholder="dd/mm/yyyy">
+                            <input type="date" class="form-control" id="new-date">
                         </div>
                         <div class="form-group col-md-4 col-sm-4">
                             <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
@@ -159,6 +179,18 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="./Lightpick-master/lightpick.js"></script>
+    <script>
+        // var picker = new Lightpick({ field: document.getElementById('date-picker') });  
+        // picker.default = false;
+        var options = {
+            field: document.getElementById('date-picker'),
+            singleDate: false,
+        };
+        var picker = new Lightpick(options);
+    </script>
 </body>
 
 </html>

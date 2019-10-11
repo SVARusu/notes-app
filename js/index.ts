@@ -1,6 +1,21 @@
 import { DB } from './db';
 import './stitch/stitchIndex';
 import { loginAnonymous, hasLoggedInUser } from './stitch/stitchIndex';
+import { categories, todos, users } from './stitch/mongodb';
+console.log(todos);
+const query = { "completed":  false  };
+
+todos.find(query).toArray()
+  .then(items => {
+    console.log(`Successfully found ${items.length} documents.`)
+    items.forEach(console.log)
+    items.forEach((element: any) => {
+      console.log(element.owner_id);
+      
+    });
+    return items
+  })
+  .catch(err => console.error(`Failed to find documents: ${err}`))
 
 const db = new DB();
 //let loginButton: Element = document.querySelector("#login-button") as HTMLElement;

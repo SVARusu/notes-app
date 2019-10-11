@@ -1,6 +1,4 @@
-import { resolve } from "path";
-import { rejects } from "assert";
-import { cursorTo } from "readline";
+import { categories, todos, users } from './stitch/mongodb';
 
 class DB {
 
@@ -148,31 +146,48 @@ class DB {
     }
 
     addUser(username: string, email: string, password: string) {
-        let newUser = { username: username, email: email, password: password };
-        let transaction = this.db.transaction(['user'], 'readwrite');
-        let objectStore = transaction.objectStore('user');
+        let found: boolean = false;
+        let newUser = { username: username, password: password, email: email };
+        const query = { "username": username }
         return new Promise((resolve, reject) => {
-            this.userExists(objectStore, username)
-                .then((found) => {
-                    if (!found) {
-                        let request = objectStore.add(newUser);
-                        request.onsuccess = function (e: Event) {
-                            console.log("oh no");
-                            resolve();
-                        };
-                        transaction.oncomplete = function () {
-                            console.log("new data added");
-                        };
-                        transaction.onerror = function () {
-                            console.log('Transaction not opened due to error');
-
-                        };
+            users.findOne(query)
+                .then(result => {
+                    let user: any = result
+                    if (result) {
+                        resolve();
+                    } else {
+                        console.log("No document matches the provided query.")
+                        users.insertOne(newUser)
+                            .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
+                            .catch(err => console.error(`Failed to insert item: ${err}`))
                     }
                 })
-                .catch(() => {
+                .catch(err => console.error(`Failed to find document: ${err}`))
+        })
+        // let transaction = this.db.transaction(['user'], 'readwrite');
+        // let objectStore = transaction.objectStore('user');
+        // return new Promise((resolve, reject) => {
+        //     this.userExists(objectStore, username)
+        //         .then((found) => {
+        //             if (!found) {
+        //                 let request = objectStore.add(newUser);
+        //                 request.onsuccess = function (e: Event) {
+        //                     console.log("oh no");
+        //                     resolve();
+        //                 };
+        //                 transaction.oncomplete = function () {
+        //                     console.log("new data added");
+        //                 };
+        //                 transaction.onerror = function () {
+        //                     console.log('Transaction not opened due to error');
 
-                });
-        });
+        //                 };
+        //             }
+        //         })
+        //         .catch(() => {
+
+        //         });
+        // });
     }
 
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */

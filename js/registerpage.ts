@@ -1,4 +1,5 @@
 import { DB } from './db';
+import { categories, todos, users } from './stitch/mongodb';
 const db = new DB();
 
 let validateUsername: HTMLInputElement = document.querySelector("#username") as HTMLInputElement;
@@ -109,20 +110,53 @@ function drawBorder(e: Event) {
 if (form) {
     form.addEventListener("submit", (e: Event) => {
         e.preventDefault();
+        const newUser = {
+            "username": validateUsername.value,
+            "password": validatePassword.value,
+            "email": validateEmail.value
+        }
+        // users.insertOne(newUser)
+        //     .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
+        //     .catch(err => console.error(`Failed to insert item: ${err}`))
+
+        const query = { "username": "alexandru.rusu" }
+        users.findOne(query)
+            .then(result => {
+                let user:any = result
+                if (result) {
+                    console.log(`Successfully found document: ${result}.`)
+                    console.log(user._id.toString());
+                    
+                } else {
+                    console.log("No document matches the provided query.")
+                }
+            })
+            .catch(err => console.error(`Failed to find document: ${err}`))
+
+
+
         db.addUser(validateUsername.value, validateEmail.value, validatePassword.value)
             .then(() => {
-                validateUsername.value = '';
-                validateEmail.value = '';
-                validatePassword.value = '';
-                validateRetypedPassword.value = '';
-
-                // User added
-                console.log("user added");
-
+                console.log("user already exists");
+                let p: Element = document.querySelector("#user-exists") as HTMLElement
+                (<HTMLElement>p).style.color = 'red';
+                p.textContent = "User already exists";
+                p.setAttribute("class", "text-center")
+                
             })
-            .catch(() => {
+            // .then(() => {
+            //     validateUsername.value = '';
+            //     validateEmail.value = '';
+            //     validatePassword.value = '';
+            //     validateRetypedPassword.value = '';
 
-            });
+            //     // User added
+            //     console.log("user added");
+
+            // })
+            // .catch(() => {
+
+            // });
     });
 }
 
