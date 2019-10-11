@@ -1,6 +1,7 @@
 *{
   margin: 0;
   padding: 0;
+  font-size: 15px
 }
 /* #username{
     width: 400px;
@@ -29,35 +30,119 @@
 }
 /* ///////////////// TOOTLTIP FOR REGISTER PAGE ///////////////// */
 .tooltiptext {
-    visibility: hidden;
-    width: 200px;
-    background-color: red;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 10;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -60px;
-  }
+  visibility: hidden;
+  width: 200px;
+  background-color: red;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+}
 
-  .tooltiptext::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: red transparent transparent transparent;
-  }
+.tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: red transparent transparent transparent;
+}
 
-  #error-message{
-    color: red;
-  }
+#error-message{
+  color: red;
+}
 
-  #completed-note-list{
-    text-decoration: line-through;
-  }
+#completed-note-list{
+  text-decoration: line-through;
+}
+#logout-button{
+  margin-left: auto;
+  padding: 0;
+}
+
+#new-note, #selected-category, #new-date, #note-button, #manage-category-button, #date-picker{
+  border-radius: 15px;
+}
+#date-picker{
+  border: 1px solid rgb(199, 198, 198);
+  text-align: center;
+}
+input::-webkit-input-placeholder {
+  text-align: center;
+}
+/* ??????????????????????? CHECKBOX STYLE ????????????????????????? */
+.cat-list{
+  list-style: none;
+}
+
+.cat-list label {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  border: 1px solid black;
+}
+.cat-list label:hover input ~ .checkmark{
+  background-color: #ccc;
+}
+.cat-list label input:checked ~ .checkmark {
+  
+  border-radius: 50%;
+  border: 1px solid black;
+  
+}
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+.cat-list label input:checked ~ .checkmark:after {
+  display: block;
+ 
+}
+.checkmark:after {
+  left: 5px;
+  /* top: 10px; */
+  width: 9px;
+  height: 16px;
+  border: solid rgb(0, 0, 0);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+#manage-category-button{
+  padding: 0;
+  font-size: 14px;
+  width: 70px;
+  
+}
+
+.range-label, .range-input{
+  width: 100%;
+}
