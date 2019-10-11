@@ -135,12 +135,14 @@ class DB {
     return objectId.toString();
   }
 
-  addNewNote = async (
-    userId: string,
+  // PROTOTYPE: will replace 'addNewNote'
+  addNewNote(a: any, b: any, c: any, d: any) { };
+  addNewNote2 = async (
     categoryName: string,
     noteText: string,
     dueDate: string
   ) => {
+    const userId = sessionStorage.getItem("loggedUser") as string;
     const category_id = await this.getCategoryId(userId, categoryName);
 
     let createTodo = {
@@ -161,38 +163,36 @@ class DB {
     }
   }
 
-  markCompletedNote = (todoId: number, checked: boolean) => {
-    return new Promise((resolve, reject) => {
-      //let db: IDBDatabase;
-      let transaction = this.db.transaction(['todos'], "readwrite");
-      let objectStore = transaction.objectStore('todos');
-      objectStore.openCursor().onsuccess = (e: any) => {
-        let cursor = e.target.result as IDBCursorWithValue;
-        if (cursor) {
-          if (cursor.value.id === todoId) {
-            console.log(cursor.value);
-            let data = cursor.value;
-            data.completed = checked;
-            let requestUpdate = objectStore.put(data);
+  // PROTOTYPE: will replace 'markCompletedNote'
+  getTodoObjectId = async (userId: string, todoId: string) => {
+    const query = { "owner_id": { "$eq": userId } };
+    const options = { "limit": 1000 };
+    const notes = await todos.find(query, options).asArray() as any[];
+    const noteToFind = notes.filter(note => note._id.toString() === todoId)
+    const note = noteToFind[0];
 
-          }
-          cursor.continue();
-        } else {
-          resolve();
-        }
-      }
-    });
+    return note._id;
+  }
+
+  markCompletedNote = async (todoId: string, checked: boolean) => {
+    const userId = sessionStorage.getItem("loggedUser") as string;
+    const todoObjectId = await this.getTodoObjectId(userId, todoId);
+
+    const query = { "_id": { "$eq": todoObjectId } }
+    const update = { "$set": { "completed": checked } };
+    todos.updateOne(query, update);
   }
 
   // PROTOTYPE - TODO: add filtering by date
   printTodos = async (
-    userId: string,
     category?: string,
     completed?: boolean,
     dueDate?: string,
     startDate?: string,
     endDate?: string
   ) => {
+    const userId = sessionStorage.getItem("loggedUser") as string;
+
     const query = { "owner_id": { "$eq": userId } };
     const options = { "limit": 1000 };
     let notes = await todos.find(query, options).asArray() as any[];

@@ -1,5 +1,4 @@
 import { DB } from './db';
-import { getUserId } from './utils';
 
 const db = new DB();
 
@@ -82,7 +81,7 @@ function init() {
 function printEveryTodo() {
     /* //////////////////////////Print todos ////////////////////////////// */
     function printToDos() {
-        db.printTodos(getUserId())
+        db.printTodos()
             .then((allTodos: any) => {
                 allTodos.sort(compare);
                 let isChecked = false
@@ -190,7 +189,7 @@ function printEveryTodo() {
     }
     /* //////////////////////////Call this function when a todo checkbox is checked ////////////////////////////// */
     function markCompletedNote(e: Event) {
-        let todoId = Number((<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).getAttribute('data-note-id'));
+        let todoId = <string>((<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).getAttribute('data-note-id'));
         let checked = (<HTMLInputElement>e.target).checked;
         db.markCompletedNote(todoId, checked)
             .then(() => {
