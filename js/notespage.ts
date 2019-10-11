@@ -1,5 +1,5 @@
 import { DB } from './db';
-
+import { getUserId } from './utils';
 
 const db = new DB();
 
@@ -60,7 +60,7 @@ function init() {
     notesForm.addEventListener("submit", (e: Event) => {
         e.preventDefault();
         if (Number(selectedCategory.value) !== 0 && newNote.value !== '' && newDate.value !== '') {
-            let color = selectedCategory.options[selectedCategory.selectedIndex].style.background;
+            let color = selectedCategory.options[selectedCategory.selectedIndex].style.background as string;
             db.addNewNote(newNote.value, selectedCategory.value, color, newDate.value)
             printEveryTodo();
             newNote.value = "";
@@ -82,7 +82,7 @@ function init() {
 function printEveryTodo() {
     /* //////////////////////////Print todos ////////////////////////////// */
     function printToDos() {
-        db.printTodos()
+        db.printTodos(getUserId())
             .then((allTodos: any) => {
                 allTodos.sort(compare);
                 let isChecked = false

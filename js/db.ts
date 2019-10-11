@@ -1,6 +1,5 @@
 import { categories, todos, users } from './stitch/mongodb';
 
-
 class DB {
 
   db: IDBDatabase | any;
@@ -58,6 +57,9 @@ class DB {
     };
   }
 
+  /**
+   *  LOGIN FUNCTIONS
+   */
   userExists = async (username: string) => {
     const query = { "username": { "$eq": username } };
     const options = { "limit": 1 };
@@ -93,23 +95,9 @@ class DB {
     }
   }
 
-  /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
-  addNewNote(newNote: string, category: string, color: any, newDate: string) {
-    let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser"), category: category, color: color, dueDate: newDate, completed: false }
-    let transaction = this.db.transaction(['todos'], "readwrite");
-    let objectStore = transaction.objectStore('todos');
-    if (newNote !== '') {
-      let request = objectStore.add(createTodo);
-      request.onsuccess = function () {
-        // Clear the form, ready for adding the next entry
-        //newNote = '';
-      };
-    }
-    transaction.oncomplete = () => {
-      this.printTodos();
-    }
-  }
-
+  /** 
+   *  REGISTRATION FUNCTIONS
+   */
   addUser(username: string, email: string, password: string) {
     let found: boolean = false;
     let newUser = { username: username, password: password, email: email };
@@ -129,29 +117,95 @@ class DB {
         })
         .catch(err => console.error(`Failed to find document: ${err}`))
     })
-
   }
 
-  /* ///////////////////////////////// PRINT TODOS /////////////////////////////// */
-  printTodos() {
+  /** 
+   *  NOTES FUNCTIONS
+   */
+  getUserCategories = async (userId: string) => {
+    const query = { "owner_id": { "$eq": userId } };
+    const options = { "limit": 1000 };
+    return await categories.find(query, options).asArray();
+  }
+
+  getCategoryId = async (userId: string, category: string) => {
+    const categories = await this.getUserCategories(userId) as any[];
+    const categArray = categories.filter(categ => categ.name === category) as any;
+    const objectId = categArray[0]._id;
+    return objectId.toString();
+  }
+
+  addNewNote = async (
+    userId: string,
+    categoryName: string,
+    noteText: string,
+    dueDate: string
+  ) => {
+    const category_id = await this.getCategoryId(userId, categoryName);
+
+    let createTodo = {
+      owner_id: userId,
+      category_id: category_id,
+      completed: false,
+      todo: noteText,
+      dueDate: dueDate
+    }
+
+    if (noteText !== '') {
+      todos.insertOne(createTodo)
+        .then((result) => {
+          console.log(`Successfully added note with _id ${result.insertedId}`);
+          this.printTodos(userId);
+        })
+        .catch((err) => console.log(err));
+    }
+  }
+
+  markCompletedNote = (todoId: number, checked: boolean) => {
     return new Promise((resolve, reject) => {
-      let objectStore = this.db.transaction('todos').objectStore('todos');
-      let allTodos: any = [];
-      objectStore.openCursor().onsuccess = function (e: any) {
+      //let db: IDBDatabase;
+      let transaction = this.db.transaction(['todos'], "readwrite");
+      let objectStore = transaction.objectStore('todos');
+      objectStore.openCursor().onsuccess = (e: any) => {
         let cursor = e.target.result as IDBCursorWithValue;
         if (cursor) {
-          if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser && cursor.value.completed === false) {
-            allTodos.push(cursor.value);
-            // cursorValue.push(cursor.value.id);
+          if (cursor.value.id === todoId) {
+            console.log(cursor.value);
+            let data = cursor.value;
+            data.completed = checked;
+            let requestUpdate = objectStore.put(data);
 
           }
           cursor.continue();
         } else {
-          resolve(allTodos);
-          console.log(allTodos);
+          resolve();
         }
       }
-    })
+    });
+  }
+
+  // PROTOTYPE - TODO: add filtering by date
+  printTodos = async (
+    userId: string,
+    category?: string,
+    completed?: boolean,
+    dueDate?: string,
+    startDate?: string,
+    endDate?: string
+  ) => {
+    const query = { "owner_id": { "$eq": userId } };
+    const options = { "limit": 1000 };
+    let notes = await todos.find(query, options).asArray() as any[];
+
+    if (category) {
+      const id = this.getCategoryId(userId, category);
+      notes = notes.filter(note => note.category_id === id);
+    }
+    if (completed) {
+      notes = notes.filter(note => note.completed === true);
+    }
+
+    return notes;
   }
 
   printCompletedTodos() {
@@ -214,28 +268,28 @@ class DB {
     });
   }
 
-  markCompletedNote = (todoId: number, checked: boolean) => {
-    return new Promise((resolve, reject) => {
-      //let db: IDBDatabase;
-      let transaction = this.db.transaction(['todos'], "readwrite");
-      let objectStore = transaction.objectStore('todos');
-      objectStore.openCursor().onsuccess = (e: any) => {
-        let cursor = e.target.result as IDBCursorWithValue;
-        if (cursor) {
-          if (cursor.value.id === todoId) {
-            console.log(cursor.value);
-            let data = cursor.value;
-            data.completed = checked;
-            let requestUpdate = objectStore.put(data);
+  // markCompletedNote = (todoId: number, checked: boolean) => {
+  //   return new Promise((resolve, reject) => {
+  //     //let db: IDBDatabase;
+  //     let transaction = this.db.transaction(['todos'], "readwrite");
+  //     let objectStore = transaction.objectStore('todos');
+  //     objectStore.openCursor().onsuccess = (e: any) => {
+  //       let cursor = e.target.result as IDBCursorWithValue;
+  //       if (cursor) {
+  //         if (cursor.value.id === todoId) {
+  //           console.log(cursor.value);
+  //           let data = cursor.value;
+  //           data.completed = checked;
+  //           let requestUpdate = objectStore.put(data);
 
-          }
-          cursor.continue();
-        } else {
-          resolve();
-        }
-      }
-    });
-  }
+  //         }
+  //         cursor.continue();
+  //       } else {
+  //         resolve();
+  //       }
+  //     }
+  //   });
+  // }
 
   /* ///////////////////////////////// Categories /////////////////////////////// */
   categoryExists = (objectStore: any, category: string) => {
