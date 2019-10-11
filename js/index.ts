@@ -31,8 +31,7 @@ async function init() {
   if (loginForm && loginUsername && loginPassword) {
     loginForm.addEventListener('submit', (e: Event) => {
       e.preventDefault();
-      // db.loginUser(loginUsername.value, loginPassword.value)
-      db.loginUserM('marcel', 'marcelaa')
+      db.loginUser(loginUsername.value, loginPassword.value)
         .then((verdict) => {
           if (verdict === true) {
             console.log(window.location);
