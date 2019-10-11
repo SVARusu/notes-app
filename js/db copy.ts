@@ -259,7 +259,7 @@ class DB {
 
     createNewCategory = (category: string, color: string) => {
         let found = false;
-        let newCategory = { owner_id: sessionStorage.getItem("loggedUser"), name: category, color: color, removed: false };
+        let newCategory = { owner_id: sessionStorage.getItem("loggedUser"), name: category, color: color };
         const query = { owner_id: sessionStorage.getItem("loggedUser"), name: category };
         return new Promise((resolve, reject) => {
             categories.findOne(query)
@@ -302,80 +302,86 @@ class DB {
     }
 
     editCategory = (newCatName: string, currentCategory: string) => {
-        const query = { owner_id: sessionStorage.getItem("loggedUser"), name: currentCategory };
-        return new Promise((resolve, rejects) => {
-            const update = { "$set": { name: newCatName } };
-            categories.updateOne(query, update)
-                .then(result => {
-                    const { matchedCount, modifiedCount } = result;
-                    if (matchedCount && modifiedCount) {
-                        console.log(`Successfully updated the item.`);
-                        resolve();
+        return new Promise((resolve, reject) => {
+            let transaction = this.db.transaction(['categories'], 'readwrite');
+            let objectStore = transaction.objectStore('categories');
+            objectStore.openCursor().onsuccess = (e: any) => {
+                let cursor = e.target.result as IDBCursorWithValue;
+                if (cursor) {
+                    if (cursor.value.category === currentCategory) {
+                        let secondTransaction = this.db.transaction(['todos'], 'readwrite');
+                        let secondObjectStore = secondTransaction.objectStore('todos');
+                        secondObjectStore.openCursor().onsuccess = (e: any) => {
+                            let cursor = e.target.result as IDBCursorWithValue;
+                            if (cursor) {
+                                if (cursor.value.category === currentCategory) {
+                                    let data = cursor.value;
+                                    data.category = newCatName;
+                                    let requestUpdate = secondObjectStore.put(data);
+                                }
+                                cursor.continue();
+                            }
+                        }
+                        let data = cursor.value;
+                        data.category = newCatName;
+                        let requestUpdate = objectStore.put(data);
                     }
-                })
-                .catch(err => console.error(`Failed to update the item: ${err}`))
-        });
-        // return new Promise((resolve, reject) => {
-        //     let transaction = this.db.transaction(['categories'], 'readwrite');
-        //     let objectStore = transaction.objectStore('categories');
-        //     objectStore.openCursor().onsuccess = (e: any) => {
-        //         let cursor = e.target.result as IDBCursorWithValue;
-        //         if (cursor) {
-        //             if (cursor.value.category === currentCategory) {
-        //                 let secondTransaction = this.db.transaction(['todos'], 'readwrite');
-        //                 let secondObjectStore = secondTransaction.objectStore('todos');
-        //                 secondObjectStore.openCursor().onsuccess = (e: any) => {
-        //                     let cursor = e.target.result as IDBCursorWithValue;
-        //                     if (cursor) {
-        //                         if (cursor.value.category === currentCategory) {
-        //                             let data = cursor.value;
-        //                             data.category = newCatName;
-        //                             let requestUpdate = secondObjectStore.put(data);
-        //                         }
-        //                         cursor.continue();
-        //                     }
-        //                 }
-        //                 let data = cursor.value;
-        //                 data.category = newCatName;
-        //                 let requestUpdate = objectStore.put(data);
-        //             }
-        //             cursor.continue();
-        //         } else {
-        //             resolve();
-        //         }
-        //     }
-        // })
+                    cursor.continue();
+                } else {
+                    resolve();
+                }
+            }
+        })
     }
 
     removeCategory = (catId: number, catName: any) => {
-        const query = { owner_id: sessionStorage.getItem("loggedUser"), name: catName };
+        const query = {  name: catName };
+        categories.findOne(query)
+            .then(result => {
+                let user: any = result
+                if (result) {
+                    console.log(result);
+
+                } else {
+                    console.log("No document matches the provided query.")
+
+                }
+            })
+            .catch(err => console.error(`Failed to find document: ${err}`))
         return new Promise((resolve, rejects) => {
-            const update = { "$set": { removed: true } };
-            categories.updateOne(query, update)
-                .then(result => {
-                    const { matchedCount, modifiedCount, upsertedId } = result;
-                    if (upsertedId) {
-                        console.log(`Document not found. Inserted a new document with _id: ${upsertedId}`)
+            let transaction = this.db.transaction(['categories'], 'readwrite');
+            let objectStore = transaction.objectStore('categories');
+            console.log(objectStore.name);
+            let request = objectStore.delete(catId);
+            transaction.oncomplete = () => {
+                console.log("category removed");
+                let transaction = this.db.transaction(['todos'], 'readwrite');
+                let objectStore = transaction.objectStore('todos');
+                objectStore.openCursor().onsuccess = (e: any) => {
+                    let cursor = e.target.result as IDBCursorWithValue;
+                    if (cursor) {
+                        //console.log(cursor.value.category);
+                        if (cursor.value.category == catName) {
+
+                            let data = cursor.value;
+                            data.category = 'default';
+                            data.color = 'white'
+                            console.log(data);
+                            let requestUpdate = objectStore.put(data);
+                        }
+                        cursor.continue()
                     } else {
-                        console.log(`Deleted item.`)
-                        const query = { owner_id: sessionStorage.getItem("loggedUser"), category: catName };
-                        const update = { category: "default" };
-                        todos.updateMany(query, update)
-                            .then(result => {
-                                const { matchedCount, modifiedCount } = result;
-                                console.log(`Successfully matched ${matchedCount} and modified ${modifiedCount} items.`)
-                                resolve();
-                            })
-                            .catch(err => console.error(`Failed to update items: ${err}`))
+                        resolve();
                     }
-                })
-                .catch(err => console.error(`Failed to upsert document: ${err}`))
+                }
+
+            }
         });
     }
 
     printCategories = () => {
         return new Promise((resolve, reject) => {
-            const query = { owner_id: sessionStorage.getItem("loggedUser"), removed: false };
+            const query = { owner_id: sessionStorage.getItem("loggedUser") };
             categories.find(query).toArray()
                 .then(items => {
                     resolve(items);
