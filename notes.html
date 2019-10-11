@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -15,41 +14,14 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="./Lightpick-master/css/lightpick.css">
     <title>Document</title>
 </head>
 
 <body class="notes-body">
-    <nav class="navbar navbar-expand-xl navbar-dark bg-dark mb-3">
-        <div class="container ">
-            <a href="" class="navbar-brand">Todos</a>
-
-            <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="navbarNav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <button href="" class="nav-link btn" id="view-uncompleted-todos">View your todos</button>
-                    </li>
-                    <li class="nav-item">
-                        <button href="" class="nav-link btn" id="view-completed-todos">Completed todos</button>
-                    </li>
-                    <li class="nav-item">
-                        <button href="" class="nav-link btn" id="" data-toggle="modal" data-target="#exampleModalCenter">Categories</button>
-                    </li>
-                    <li class="nav-item">
-                        <button href="" class="nav-link btn" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
-                    </li>
-
-                    <li class="nav-item"></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
+    <p style="width: 20px; height: 20px; background: black;"></p>
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -63,6 +35,7 @@
                 <div class="modal-body">
                     <article class="card-body mx-auto mb-3">
                         <h5 class="card-title mt-3">Create a new category</h5>
+                        <p id="category-error"></p>
                         <form action="" id="create-category-form">
                             <div class="form-group">
                                 <label for="new-category">Enter category name</label>
@@ -95,104 +68,137 @@
             </div>
         </div>
     </div>
-
-
-
-    <div class="container  mb-5">
-        <div class="row bg-light pt-3 mb-5">
-            <div class="col-sm-8 col-md-8 col-lg-8 col-xl-10">
-                <form action="" id="note-form" class="form-row">
-                    <div class="form-group input-group col-md-6 col-sm-8">
-
-                        <input type="text" class="form-control" id="new-note">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <nav class="sidebar">
+                    <div class="navbar-header mb-5">
+                        <h2>ToDo App</h2>
                     </div>
-                    <div class="form-group input-group col-md-3 col-sm-4">
-                        <select class="form-control" id="selected-category">
+                    <ul class="list-unstyled components">
+                        <h5 class="section-title">Filter by</h5>
+                        <li>
+                            <ul class="list-unstyled mb-3">
+                                <p class="section-title">Status</p>
+                                <li class="d-flex cat-list">
+                                    <label class="">Completed
+                                        <input type="checkbox" name="" id="view-completed-todos" class="my-auto mr-2">
+                                        <span class="checkmark"></span>
+                                    </label>
 
-                        </select>
-                    </div>
-                    <div class="form-group input-group col-md-3 col-sm-3">
+                                </li>
+                            </ul>
 
-                        <input type="date" class="form-control" id="new-date">
-                    </div>
-                </form>
+                            <ul class="unstyled-list mb-3 cat-list">
+                                <p class="section-title">Date</p>
+                                <li class="d-flex">
+                                    <label class="">Today
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        
+                                        <span class="checkmark"></span>
+                                    </label>
 
+                                </li>
+                                <li class="d-flex">
+                                    <label class="">
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <span class="my-auto">This Week</span>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </li>
+                                <li class="d-flex">
+                                    <label class="range-label">
+                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                        <input type="text" class="range-input" id="date-picker" placeholder="dd/mm/yyyy - dd/mm/yyyy">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </li>
+                            </ul>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="section-title">Categories</span>
+                                <button class="btn btn-primary text-sm-center" data-toggle="modal" data-target="#exampleModalCenter"
+                                    id="manage-category-button">Manage</button>
+                            </div>
+                            <ul class="unstyled-list mb-3 cat-list" id="cat-list">
+
+
+
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-            <div class="col-sm-4 col-md-4 col-lg-3 col-xl-2">
-                <div class="form-group">
-                    <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
+            <div class="col-md-9">
+                <div class="col-md-12 mb-5 ">
+                    <button href="" class="nav-link btn pull-right" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
                 </div>
-            </div>
-        </div>
-        <div class="row uncompleted-todos-title">
-            <div class="col-sm-4">
-                <h4 class="">Your todos</h4>
-            </div>
-        </div>
-        <div class="row  completed-todos-title">
-            <div class="col-sm-4">
-                <h4 class="">Your completed todos</h4>
-            </div>
-        </div>
-        <div class="row my-2">
-            <div class="col-sm-12 col-md-6 col-lg-4">
-                <form action="" class="">
-                    <div class="form-group ">
-                        <label for="filter-todos">Group todos by category </label>
-                        <select class="form-control" id="filter-todos">
+                <div class="col-sm-8 col-md-8 col-lg-8 col-xl-12">
+                    <form action="" id="note-form" class="form-row">
+                        <div class="form-group col-md-12 col-sm-12">
+                            <label for="new-note">Todo description</label>
+                            <input type="text" class="form-control" id="new-note" placeholder="ToDo description">
+                        </div>
+                        <div class="col-md-12">
+                            <p>Category</p>
+                        </div>
+                        <div class="form-group input-group col-md-4 col-sm-4">
+                            <p id="color-box"></p>
+                            <select class="form-control" id="selected-category">
 
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="col-sm-12 col-md-6 col-lg-4">
-                <form action="" class="">
-                    <div class="form-group ">
-                        <label for="filter-todos">Group by due date </label>
-                        <select class="form-control" id="filter-by-date">
-                            <option value=0>Display all todos</option>
-                            <option value=1>Today</option>
-                            <option value=2>This week</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="row mb-5">
-            <div class="col-sm-10 col-md-10 col-lg-10">
-                <label for="start-date" class="mr-2">Filter by date range</label>
-                <form action="" class="form-inline" id="date-range-form">
-                    <label for="start-date" class="mr-2">Start date</label>
-                    <input type="date" name="" id="start-date" class="form-control mr-2">
+                            </select>
+                        </div>
 
-                    <label for="end-date" class="mr-2">End date</label>
-                    <input type="date" name="" id="end-date" class="form-control mr-2">
-                </form>
-                <p id="filter-by-date-range-error"></p>
-            </div>
+                        <div class="form-group input-group col-md-4 col-sm-4">
 
-        </div>
-        <div class="row uncompleted-todos">
-            <div class="col-sm-10  mx-auto">
-                <ul class="list-group" id="note-list">
+                            <input type="date" class="form-control" id="new-date">
+                        </div>
+                        <div class="form-group col-md-4 col-sm-4">
+                            <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
+                        </div>
+                    </form>
+                </div>
 
-                </ul>
-            </div>
-        </div>
 
-        <div class="row mt-3 completed-todos">
-            <div class="col-sm-10  mx-auto">
-                <ul class="list-group" id="completed-note-list">
+                <div class="col-sm-4 uncompleted-todos-title">
+                    <h4 class="">Your todos</h4>
+                </div>
 
-                </ul>
+
+                <div class="col-sm-4 completed-todos-title">
+                    <h4 class="">Your completed todos</h4>
+                </div>
+
+
+                <div class="col-sm-10  mx-auto uncompleted-todos">
+                    <ul class="list-group" id="note-list">
+
+                    </ul>
+                </div>
+
+
+
+                <div class="col-sm-10  mx-auto completed-todos">
+                    <ul class="list-group" id="completed-note-list">
+
+                    </ul>
+                </div>
+
+
             </div>
         </div>
     </div>
 
-
-
-
-    <!-- <script src="bundle.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="./Lightpick-master/lightpick.js"></script>
+    <script>
+        // var picker = new Lightpick({ field: document.getElementById('date-picker') });  
+        // picker.default = false;
+        var options = {
+            field: document.getElementById('date-picker'),
+            singleDate: false,
+        };
+        var picker = new Lightpick(options);
+    </script>
 </body>
 
 </html>

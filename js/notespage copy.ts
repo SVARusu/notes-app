@@ -14,7 +14,7 @@ let selectedCategory: HTMLSelectElement = document.querySelector("#selected-cate
 let newCategoryFrom: HTMLFormElement = document.querySelector("#create-category-form") as HTMLFormElement;
 let newCategory: HTMLInputElement = document.querySelector("#new-category") as HTMLInputElement;
 let pickedColor: HTMLInputElement = document.querySelector("#picked-color") as HTMLInputElement;
-let filterByCategory = document.querySelector("#cat-list") as HTMLUListElement;
+let filterByCategory: HTMLSelectElement = document.querySelector("#filter-todos") as HTMLSelectElement;
 let modalCategoryList: HTMLElement = document.querySelector("#category-list") as HTMLElement;
 let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElement;
 let filterByDate: HTMLSelectElement = document.querySelector("#filter-by-date") as HTMLSelectElement;
@@ -50,10 +50,6 @@ function init() {
     //     (<HTMLInputElement>document.querySelector('.completed-todos')).style.display = "contents";
     //     (<HTMLInputElement>document.querySelector('.completed-todos-title')).style.display = "contents";
     // });
-    /////////////////////////////////////// CHANGE SMALL BOX COLOR //////////////////////////////////
-    selectedCategory.addEventListener('change', function(e: any){
-        (<HTMLElement>document.querySelector("#color-box")).style.background = selectedCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute');
-    });
     logOut.addEventListener('click', function () {
         sessionStorage.setItem("loggedUser", '');
         let location = window.location.href;
@@ -72,21 +68,12 @@ function init() {
         }
     });
     newCategoryFrom.addEventListener("submit", function (e: Event) {
-        let printError: Element = document.querySelector("#category-error") as HTMLElement;
-        printError.textContent = "";
         e.preventDefault();
         db.createNewCategory(newCategory.value, pickedColor.value)
-            .then((found) => {
-                if (!found) {
-                    newCategory.value = '';
-                    pickedColor.value = '#000000';
-                    printError.textContent = "New category added";
-                    console.log("New category added");
-                } else {
-                    printError.textContent = "Category already exists";
-                    (<HTMLElement>printError).style.color = 'red';
-                }
-
+            .then(() => {
+                newCategory.value = '';
+                pickedColor.value = '#000000';
+                console.log("New category added");
                 printEveryTodo();
             });
     });
@@ -124,10 +111,8 @@ function printEveryTodo() {
         /* //////////////////////////Display the categories in the modal ////////////////////////////// */
         db.printCategories()
             .then((allCategories: any) => {
-                console.log(allCategories);
-
                 displayCategories(allCategories, selectedCategory, false);
-                displayCategoriesInList(allCategories, filterByCategory, true);
+                displayCategories(allCategories, filterByCategory, true);
                 while (modalCategoryList.firstChild) {
                     modalCategoryList.removeChild(modalCategoryList.firstChild as ChildNode);
                 }
@@ -135,7 +120,7 @@ function printEveryTodo() {
                     let listItem = document.createElement('li');
                     let p = document.createElement('p');
                     let button = document.createElement('button');
-                    p.textContent = category.name;
+                    p.textContent = category.category;
                     p.setAttribute('class', 'my-auto');
                     p.onclick = convertPToInput;
                     button.textContent = 'x';
@@ -144,84 +129,79 @@ function printEveryTodo() {
                     listItem.setAttribute("class", "list-group-item d-flex justify-content-between");
                     listItem.appendChild(p);
                     listItem.appendChild(button);
-                    listItem.setAttribute('data-note-id', category._id.toString());
+                    listItem.setAttribute('data-note-id', category.id);
                     modalCategoryList.appendChild(listItem);
 
                 });
             })
     }
     /* //////////////////////////Filter and display todos by category////////////////////////////// */
-    // filterByCategory.addEventListener('change', (e: Event) => {
-    //     specificTodos();
-    // });
+    filterByCategory.addEventListener('change', (e: Event) => {
+        specificTodos();
+    });
 
-    // filterByDate.addEventListener('change', () => {
-    //     specificTodos();
-    // });
+    filterByDate.addEventListener('change', () => {
+        specificTodos();
+    });
 
-    // rangeForm.addEventListener('change', function () {
-    //     specificTodos();
-    // });
+    rangeForm.addEventListener('change', function () {
+        specificTodos();
+    });
+    function specificTodos() {
+        let date: any = [];
+        if (Number(filterByDate.value) === 1) {
+            let currDate = getCurrentDate();
+            date.push(currDate)
+        } else if (Number(filterByDate.value) === 2) {
+            let curr = new Date();
+            for (let i = 1; i <= 7; i++) {
+                let first = curr.getDate() - curr.getDay() + i
+                let day = new Date(curr.setDate(first)).toISOString().slice(0, 10)
+                date.push(day)
+            }
+        } else {
+            date.push(Number(filterByDate.value));
+        }
 
-
-    /////////////////////////////////////// SPECIFIC TODO ////////////////////////////////////
-
-
-    // function specificTodos() {
-    //     let date: any = [];
-    //     if (Number(filterByDate.value) === 1) {
-    //         let currDate = getCurrentDate();
-    //         date.push(currDate)
-    //     } else if (Number(filterByDate.value) === 2) {
-    //         let curr = new Date();
-    //         for (let i = 1; i <= 7; i++) {
-    //             let first = curr.getDate() - curr.getDay() + i
-    //             let day = new Date(curr.setDate(first)).toISOString().slice(0, 10)
-    //             date.push(day)
-    //         }
-    //     } else {
-    //         date.push(Number(filterByDate.value));
-    //     }
-
-    //     if (startDate.value !== '' && endDate.value !== '' && Number(new Date(endDate.value)) < Number(new Date(startDate.value))) {
-    //         let p = document.querySelector("#filter-by-date-range-error") as HTMLElement;
-    //         p.textContent = "The end date is smaller than the start date";
-    //         p.style.color = 'red';
-    //     } else {
-    //         (<HTMLElement>document.querySelector("#filter-by-date-range-error")).textContent = ''
-    //         db.printTodosByCategory(filterByCategory.value, date, startDate.value, endDate.value)
-    //             .then((todosByCategory: any) => {
-    //                 let completedTodos: any[] = [];
-    //                 let uncompletedTodos: any[] = [];
-    //                 todosByCategory.forEach((todo: any) => {
-    //                     if (todo.completed) {
-    //                         completedTodos.push(todo);
-    //                     } else {
-    //                         uncompletedTodos.push(todo);
-    //                     }
-    //                 });
-    //                 uncompletedTodos.sort(compare);
-    //                 completedTodos.sort(compare);
-    //                 console.log(completedTodos, uncompletedTodos);
-    //                 addTodosToForm(uncompletedTodos, notesList, false)
-    //                 addTodosToForm(completedTodos, completedNotesList, true)
-    //             })
-    //     }
-    // }
+        if (startDate.value !== '' && endDate.value !== '' && Number(new Date(endDate.value)) < Number(new Date(startDate.value))) {
+            let p = document.querySelector("#filter-by-date-range-error") as HTMLElement;
+            p.textContent = "The end date is smaller than the start date";
+            p.style.color = 'red';
+        } else {
+            (<HTMLElement>document.querySelector("#filter-by-date-range-error")).textContent = ''
+            db.printTodosByCategory(filterByCategory.value, date, startDate.value, endDate.value)
+                .then((todosByCategory: any) => {
+                    let completedTodos: any[] = [];
+                    let uncompletedTodos: any[] = [];
+                    todosByCategory.forEach((todo: any) => {
+                        if (todo.completed) {
+                            completedTodos.push(todo);
+                        } else {
+                            uncompletedTodos.push(todo);
+                        }
+                    });
+                    uncompletedTodos.sort(compare);
+                    completedTodos.sort(compare);
+                    console.log(completedTodos, uncompletedTodos);
+                    addTodosToForm(uncompletedTodos, notesList, false)
+                    addTodosToForm(completedTodos, completedNotesList, true)
+                })
+        }
+    }
     /* //////////////////////////Call this function when a todo checkbox is checked ////////////////////////////// */
     function markCompletedNote(e: Event) {
         let todoId = Number((<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).getAttribute('data-note-id'));
         let checked = (<HTMLInputElement>e.target).checked;
         db.markCompletedNote(todoId, checked)
             .then(() => {
-                //specificTodos();
+                specificTodos();
             });
     }
     /* //////////////////////////Remove a category////////////////////////////// */
     function deleteCategory(e: Event) {
         console.log(((<HTMLElement>(<HTMLElement>e.target).parentNode).childNodes[0]).textContent);
         let catName = ((<HTMLElement>(<HTMLElement>e.target).parentNode).childNodes[0]).textContent;
-        let catId: any = ((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
+        let catId: number = Number((<HTMLElement>(<HTMLElement>e.target).parentNode).getAttribute('data-note-id'));
         db.removeCategory(catId, catName)
             .then(() => {
                 printEveryTodo();
@@ -237,6 +217,8 @@ function printEveryTodo() {
         console.log(input.value);
         p.replaceWith(input);
         input.addEventListener('blur', function (e: any) {
+            // if (e.currentTarget.dataset.triggered) return;
+            // e.currentTarget.dataset.triggered = true;
             db.editCategory(e.target.value, currentCategory)
                 .then(() => {
                     let p = document.createElement('p');
@@ -246,32 +228,10 @@ function printEveryTodo() {
                     e.target.replaceWith(p);
                     printEveryTodo();
                 })
+
+            //alert('clicked');
         });
 
-    }
-    function displayCategoriesInList (categories: any, placeToBeDisplayed: HTMLUListElement, defaultFilter: boolean){
-        console.log(categories);
-        
-        while (placeToBeDisplayed.firstChild) {
-            placeToBeDisplayed.removeChild(placeToBeDisplayed.firstChild as ChildNode);
-        }
-        categories.forEach((category: any) => {
-            let listItem = document.createElement("li");
-            let label = document.createElement("label");
-            let input = document.createElement("input");
-            let span = document.createElement("span");
-
-            label.textContent = category.name;
-            label.style.color = category.color;
-            input.setAttribute("class" , "my-auto mr-2");
-            input.setAttribute("type", "checkbox");
-            span.setAttribute("class", "checkmark");
-            label.appendChild(input);
-            label.appendChild(span);
-            listItem.appendChild(label);
-            placeToBeDisplayed.appendChild(listItem);
-
-        });
     }
     /* //////////////////////////Display the categories in the dropdown////////////////////////////// */
     function displayCategories(categories: any, placeToBeDisplayed: HTMLSelectElement, defaultFilter: boolean) {
@@ -293,10 +253,10 @@ function printEveryTodo() {
             placeToBeDisplayed.appendChild(firstOption);
         }
         for (let i = 0; i < categories.length; i++) {
-            let option:any = document.createElement('option');
-            option.textContent = categories[i].name;
-            //option.value = categories[i].color;
-            option.setAttribute("customAttribute", categories[i].color)
+            let option = document.createElement('option');
+            option.textContent = categories[i].category;
+            option.setAttribute("class", "text-light");
+            option.style.background = categories[i].color;
             placeToBeDisplayed.appendChild(option);
         }
     }

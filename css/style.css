@@ -1,7 +1,8 @@
 *{
   margin: 0;
   padding: 0;
-  font-size: 15px
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
 }
 /* #username{
     width: 400px;
@@ -27,6 +28,9 @@
 }
 .completed-todos, .completed-todos-title{
   display: none;
+}
+.section-title{
+  font-weight: 600;
 }
 /* ///////////////// TOOTLTIP FOR REGISTER PAGE ///////////////// */
 .tooltiptext {
@@ -145,4 +149,19 @@ input[type="checkbox"] {
 
 .range-label, .range-input{
   width: 100%;
+}
+
+#color-box{
+  display: inline-block;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  margin-top: 7.5px;
+  z-index: 10;
+  
+}
+
+#selected-category{
+  text-align-last: center;
 }
