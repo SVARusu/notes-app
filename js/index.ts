@@ -26,23 +26,26 @@ let loginForm: HTMLFormElement = document.querySelector("#login-form") as HTMLFo
 async function init() {
   loginAnonymous().then(() => {
     console.log('Anonymous user logged in: ', hasLoggedInUser());
-  });
+  })
 
   if (loginForm && loginUsername && loginPassword) {
     loginForm.addEventListener('submit', (e: Event) => {
       e.preventDefault();
-      db.loginUser(loginUsername.value, loginPassword.value)
-        .then((response) => {
-          console.log(window.location);
-          let location = window.location.href;
-          //location = location.replace("index.html", "notes.html");
-          //location = location + "/notes.html";
-          if (location.includes("index.html")) {
-            location = location.replace("index.html", "notes.html");
-          } else {
-            location = location + "notes.html";
+      // db.loginUser(loginUsername.value, loginPassword.value)
+      db.loginUserM('marcel', 'marcelaa')
+        .then((verdict) => {
+          if (verdict === true) {
+            console.log(window.location);
+            let location = window.location.href;
+            //location = location.replace("index.html", "notes.html");
+            //location = location + "/notes.html";
+            if (location.includes("index.html")) {
+              location = location.replace("index.html", "notes.html");
+            } else {
+              location = location + "notes.html";
+            }
+            window.location.href = location;
           }
-          window.location.href = location;
         })
         .catch((error) => {
           let errMessage: Element = document.querySelector("#error-message") as HTMLElement;
