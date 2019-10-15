@@ -268,29 +268,6 @@ class DB {
     });
   }
 
-  // markCompletedNote = (todoId: number, checked: boolean) => {
-  //   return new Promise((resolve, reject) => {
-  //     //let db: IDBDatabase;
-  //     let transaction = this.db.transaction(['todos'], "readwrite");
-  //     let objectStore = transaction.objectStore('todos');
-  //     objectStore.openCursor().onsuccess = (e: any) => {
-  //       let cursor = e.target.result as IDBCursorWithValue;
-  //       if (cursor) {
-  //         if (cursor.value.id === todoId) {
-  //           console.log(cursor.value);
-  //           let data = cursor.value;
-  //           data.completed = checked;
-  //           let requestUpdate = objectStore.put(data);
-
-  //         }
-  //         cursor.continue();
-  //       } else {
-  //         resolve();
-  //       }
-  //     }
-  //   });
-  // }
-
   /* ///////////////////////////////// Categories /////////////////////////////// */
   categoryExists = (objectStore: any, category: string) => {
     return new Promise((resolve, reject) => {
