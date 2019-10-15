@@ -1,5 +1,5 @@
 import { categories, todos, users } from './stitch/mongodb';
-
+const BSON = require('bson');
 
 class DB {
 
@@ -95,19 +95,28 @@ class DB {
 
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
     addNewNote(newNote: string, category: string, color: any, newDate: string) {
-        let createTodo = { todo: newNote, loggedUser: sessionStorage.getItem("loggedUser"), category: category, color: color, dueDate: newDate, completed: false }
-        let transaction = this.db.transaction(['todos'], "readwrite");
-        let objectStore = transaction.objectStore('todos');
-        if (newNote !== '') {
-            let request = objectStore.add(createTodo);
-            request.onsuccess = function () {
-                // Clear the form, ready for adding the next entry
-                //newNote = '';
-            };
-        }
-        transaction.oncomplete = () => {
-            this.printTodos();
-        }
+        return new Promise((resolve, reject) => {
+            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), category_name: category, completed: false, todo: newNote, due_date: newDate, color: color };
+            todos.insertOne(createTodo)
+                .then(result => {
+                    console.log(`Successfully inserted item with _id: ${result.insertedId}`)
+                    resolve();
+                })
+                .catch(err => console.error(`Failed to insert item: ${err}`))
+        })
+
+        // let transaction = this.db.transaction(['todos'], "readwrite");
+        // let objectStore = transaction.objectStore('todos');
+        // if (newNote !== '') {
+        //     let request = objectStore.add(createTodo);
+        //     request.onsuccess = function () {
+        //         // Clear the form, ready for adding the next entry
+        //         //newNote = '';
+        //     };
+        // }
+        // transaction.oncomplete = () => {
+        //     this.printTodos();
+        // }
     }
 
     addUser(username: string, email: string, password: string) {
@@ -135,41 +144,23 @@ class DB {
     /* ///////////////////////////////// PRINT TODOS /////////////////////////////// */
     printTodos() {
         return new Promise((resolve, reject) => {
-            let objectStore = this.db.transaction('todos').objectStore('todos');
-            let allTodos: any = [];
-            objectStore.openCursor().onsuccess = function (e: any) {
-                let cursor = e.target.result as IDBCursorWithValue;
-                if (cursor) {
-                    if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser && cursor.value.completed === false) {
-                        allTodos.push(cursor.value);
-                        // cursorValue.push(cursor.value.id);
-
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(allTodos);
-                    console.log(allTodos);
-                }
-            }
+            const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: false };
+            todos.find(query).toArray()
+                .then(items => {
+                    resolve(items);
+                })
+                .catch(err => console.error(`Failed to find documents: ${err}`))
         })
     }
 
     printCompletedTodos() {
         return new Promise((resolve, reject) => {
-            let objectStore = this.db.transaction('todos').objectStore('todos');
-            let completedTodos: any = [];
-            objectStore.openCursor().onsuccess = function (e: any) {
-                let cursor = e.target.result as IDBCursorWithValue;
-                if (cursor) {
-                    if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser && cursor.value.completed === true) {
-                        completedTodos.push(cursor.value);
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(completedTodos);
-                }
-
-            }
+            const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: true };
+            todos.find(query).toArray()
+                .then(items => {
+                    resolve(items);
+                })
+                .catch(err => console.error(`Failed to find documents: ${err}`))
         });
     }
     printTodosByCategory = (category: string, date: any, startDate: any, endDate: any) => {
@@ -214,26 +205,30 @@ class DB {
         });
     }
 
-    markCompletedNote = (todoId: number, checked: boolean) => {
-        return new Promise((resolve, reject) => {
-            //let db: IDBDatabase;
-            let transaction = this.db.transaction(['todos'], "readwrite");
-            let objectStore = transaction.objectStore('todos');
-            objectStore.openCursor().onsuccess = (e: any) => {
-                let cursor = e.target.result as IDBCursorWithValue;
-                if (cursor) {
-                    if (cursor.value.id === todoId) {
-                        console.log(cursor.value);
-                        let data = cursor.value;
-                        data.completed = checked;
-                        let requestUpdate = objectStore.put(data);
+    markCompletedNote = (todoId: any, checked: boolean) => {
 
+        const filterDoc = { _id: new BSON.ObjectId(todoId) };
+        return new Promise((resolve, reject) => {
+            const query = { owner_id: sessionStorage.getItem("loggedUser"), _id: todoId };
+            // todos.find(filterDoc).toArray()
+            //     .then(items => {
+            //         console.log("yes")
+            //         console.log(items);
+
+            //         resolve(items);
+            //     })
+            //     .catch(err => console.error(`Failed to find documents: ${err}`))
+            //const query = { owner_id: sessionStorage.getItem("loggedUser"), todoId };
+            const update = { "$set": { completed: checked } };
+            todos.updateOne(filterDoc, update)
+                .then(result => {
+                    const { matchedCount, modifiedCount } = result;
+                    if (matchedCount && modifiedCount) {
+                        console.log(`Successfully updated the item.`);
+                        resolve();
                     }
-                    cursor.continue();
-                } else {
-                    resolve();
-                }
-            }
+                })
+                .catch(err => console.error(`Failed to update the item: ${err}`))
         });
     }
 
@@ -358,8 +353,8 @@ class DB {
                         console.log(`Document not found. Inserted a new document with _id: ${upsertedId}`)
                     } else {
                         console.log(`Deleted item.`)
-                        const query = { owner_id: sessionStorage.getItem("loggedUser"), category: catName };
-                        const update = { category: "default" };
+                        const query = { owner_id: sessionStorage.getItem("loggedUser"), category_name: catName };
+                        const update = { "$set": { category_name: "default" } };
                         todos.updateMany(query, update)
                             .then(result => {
                                 const { matchedCount, modifiedCount } = result;

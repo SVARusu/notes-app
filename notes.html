@@ -81,7 +81,7 @@
                             <ul class="list-unstyled mb-3">
                                 <p class="section-title">Status</p>
                                 <li class="d-flex cat-list">
-                                    <label class="">Completed
+                                    <label class="check-label">Completed
                                         <input type="checkbox" name="" id="view-completed-todos" class="my-auto mr-2">
                                         <span class="checkmark"></span>
                                     </label>
@@ -92,23 +92,23 @@
                             <ul class="unstyled-list mb-3 cat-list">
                                 <p class="section-title">Date</p>
                                 <li class="d-flex">
-                                    <label class="">Today
-                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <label class="check-label">Today
+                                        <input type="checkbox" name="" id="today-checkbox" class="my-auto mr-2 annoying">
                                         
                                         <span class="checkmark"></span>
                                     </label>
 
                                 </li>
                                 <li class="d-flex">
-                                    <label class="">
-                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <label class="check-label">
+                                        <input type="checkbox" name="" id="week-checkbox" class="my-auto mr-2 annoying">
                                         <span class="my-auto">This Week</span>
                                         <span class="checkmark"></span>
                                     </label>
                                 </li>
                                 <li class="d-flex">
-                                    <label class="range-label">
-                                        <input type="checkbox" name="" id="" class="my-auto mr-2">
+                                    <label class="range-label check-label">
+                                        <input type="checkbox" name="" id="date-picker-checkbox" class="my-auto mr-2 annoying">
                                         <input type="text" class="range-input" id="date-picker" placeholder="dd/mm/yyyy - dd/mm/yyyy">
                                         <span class="checkmark"></span>
                                     </label>
@@ -132,7 +132,7 @@
                 <div class="col-md-12 mb-5 ">
                     <button href="" class="nav-link btn pull-right" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
                 </div>
-                <div class="col-sm-8 col-md-8 col-lg-8 col-xl-12">
+                <div class="col-sm-8 col-md-8 col-lg-8 col-xl-12 mb-5">
                     <form action="" id="note-form" class="form-row">
                         <div class="form-group col-md-12 col-sm-12">
                             <label for="new-note">Todo description</label>
@@ -150,7 +150,8 @@
 
                         <div class="form-group input-group col-md-4 col-sm-4">
 
-                            <input type="date" class="form-control" id="new-date">
+                            <!-- <input type="date" class="form-control" id="new-date"> -->
+                            <input type="text" class="form-control text-center" id="new-date" placeholder="dd/mm/yyyy">
                         </div>
                         <div class="form-group col-md-4 col-sm-4">
                             <button class="btn btn-primary btn-block" id="note-button" type="submit" form="note-form">Add a new todo</button>
@@ -197,7 +198,12 @@
             field: document.getElementById('date-picker'),
             singleDate: false,
         };
+        var options2 = {
+            field: document.getElementById('new-date'),
+            singleDate: true,
+        }
         var picker = new Lightpick(options);
+        var picker2 = new Lightpick(options2);
     </script>
 </body>
 
