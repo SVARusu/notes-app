@@ -86,7 +86,7 @@ input::-webkit-input-placeholder {
   list-style: none;
 }
 
-.cat-list label {
+.check-label {
   display: block;
   position: relative;
   padding-left: 35px;
@@ -105,10 +105,10 @@ input::-webkit-input-placeholder {
   width: 20px;
   border: 1px solid black;
 }
-.cat-list label:hover input ~ .checkmark{
+.check-label:hover input ~ .checkmark{
   background-color: #ccc;
 }
-.cat-list label input:checked ~ .checkmark {
+.check-label input:checked ~ .checkmark {
   
   border-radius: 50%;
   border: 1px solid black;
@@ -119,7 +119,7 @@ input::-webkit-input-placeholder {
   position: absolute;
   display: none;
 }
-.cat-list label input:checked ~ .checkmark:after {
+.check-label input:checked ~ .checkmark:after {
   display: block;
  
 }
