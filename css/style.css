@@ -75,6 +75,21 @@
 	top: 105%;
 }
 
+.general-error-login {
+  position: absolute;
+  visibility: hidden;
+	width: 40%;
+  background-color: #e83e8c;
+  color: #fff;
+	text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+	z-index: 10;
+	transform: translateX(-50%);
+	left: 50%;
+	top: 105%;
+}
+
 #error-message{
   color: red;
 }

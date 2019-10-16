@@ -82,14 +82,14 @@ class DB {
             const user: any = await this.getUser(username);
             if (user.password === password) {
                 sessionStorage.setItem('loggedUser', user._id.toString());
-                return true;
+                return 0;
             } else {
                 console.log('password is invalid');
-                return false;
+                return 2;
             }
         } else {
             console.log(`user ${username} does not exist in database`);
-            return false;
+            return 1;
         }
     }
 
