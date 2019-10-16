@@ -120,15 +120,13 @@ class DB {
     }
 
     addUser(username: string, email: string, password: string) {
-        let found: boolean = false;
         let newUser = { username: username, password: password, email: email };
         const query = { "username": username }
         return new Promise((resolve, reject) => {
             users.findOne(query)
                 .then(result => {
-                    let user: any = result
                     if (result) {
-                        resolve();
+                        resolve(1); // user already exists
                     } else {
                         console.log("No document matches the provided query.")
                         users.insertOne(newUser)

@@ -8,6 +8,13 @@ let validateEmail: HTMLInputElement = document.querySelector("#email") as HTMLIn
 let validatePassword: HTMLInputElement = document.querySelector("#password") as HTMLInputElement;
 let validateRetypedPassword: HTMLInputElement = document.querySelector("#repassword") as HTMLInputElement;
 const form: HTMLFormElement = document.querySelector('#register-form') as HTMLFormElement;
+const submitButton = document.querySelector("#submit-button") as HTMLInputElement;
+
+const usernameError = document.querySelector(".username") as HTMLElement;
+const passwordError = document.querySelector(".password") as HTMLElement;
+const confirmedError = document.querySelector(".password2") as HTMLElement;
+const emailError = document.querySelector(".email") as HTMLElement;
+const generalError = document.querySelector(".general-error") as HTMLElement;
 
 let password: string = '';
 let confirmed: string = '';
@@ -25,13 +32,12 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
     if (errorString.includes("valid")) {
       validateUsername.removeAttribute("style");
       verifyUsername = true;
-      (<HTMLInputElement>document.querySelector(".username")).style.visibility = "hidden";
+      usernameError.style.visibility = "hidden";
     } else {
       validateUsername.setAttribute("style", "border: 2px solid red;");
       verifyUsername = false;
-      console.log(verifyUsername);
-      (<HTMLInputElement>document.querySelector(".username")).textContent = errorString;
-      (<HTMLInputElement>document.querySelector(".username")).style.visibility = "visible";
+      usernameError.textContent = errorString;
+      usernameError.style.visibility = "visible";
     }
   });
 
@@ -40,15 +46,13 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
     let value = (<HTMLInputElement>e.target).value;
 
     if (inputValidationRegex.email.test(value)) {
-      console.log(value);
       validateEmail.removeAttribute("style");
-      (<HTMLInputElement>document.querySelector(".email")).style.visibility = "hidden";
+      emailError.style.visibility = "hidden";
       verifyEmail = true;
     } else {
       validateEmail.setAttribute("style", "border: 2px solid red;");
       verifyEmail = false;
-      console.log(verifyEmail);
-      (<HTMLInputElement>document.querySelector(".email")).style.visibility = "visible";
+      emailError.style.visibility = "visible";
     }
   });
 
@@ -59,36 +63,31 @@ if (validateUsername && validateEmail && validatePassword && validateRetypedPass
     password = value;
 
     if (errorString.includes("valid")) {
-      console.log(value);
       validatePassword.removeAttribute("style");
       verifyPassword = true;
-      (<HTMLInputElement>document.querySelector(".password")).style.visibility = "hidden";
+      passwordError.style.visibility = "hidden";
     } else {
       validatePassword.setAttribute("style", "border: 2px solid red;");
       verifyPassword = false;
-      console.log(verifyPassword);
-      (<HTMLInputElement>document.querySelector(".password")).textContent = errorString;
-      (<HTMLInputElement>document.querySelector(".password")).style.visibility = "visible";
+      passwordError.textContent = errorString
+      passwordError.style.visibility = "visible";
     }
   });
 
   validateRetypedPassword.addEventListener("blur", function (e: Event) {
-    let value = (<HTMLInputElement>document.querySelector("#repassword")).value;
+    let value = (<HTMLInputElement>e.target).value;
     let errorString = passwordInputErrorHandler(value);
     confirmed = value;
 
-    console.log(value);
     if (errorString.includes("valid")) {
-      console.log(value);
       validateRetypedPassword.removeAttribute("style");
       verifyRetypedPassword = true;
-      (<HTMLInputElement>document.querySelector(".password2")).style.visibility = "hidden";
+      confirmedError.style.visibility = "hidden";
     } else {
       validateRetypedPassword.setAttribute("style", "border: 2px solid red;");
       verifyRetypedPassword = false;
-      console.log(verifyRetypedPassword);
-      (<HTMLInputElement>document.querySelector(".password2")).textContent = errorString;
-      (<HTMLInputElement>document.querySelector(".password2")).style.visibility = "visible";
+      confirmedError.textContent = errorString;
+      confirmedError.style.visibility = "visible";
     }
   });
 
@@ -102,45 +101,24 @@ function drawBorder(e: Event) {
   if (value === "") {
     (<HTMLInputElement>e.target).setAttribute("style", "border: 2px solid red;");
   }
-  if (verifyUsername && verifyEmail && verifyPassword && verifyRetypedPassword && passwordMatch(password, confirmed)) {
-    (<HTMLInputElement>document.querySelector("#submit-button")).disabled = false;
+  if (verifyUsername && verifyEmail && verifyPassword && verifyRetypedPassword) {
+    if (passwordMatch(password, confirmed)) {
+      submitButton.disabled = false;
+      generalErrorHandler('clear');
+    } else {
+      generalErrorHandler('password');
+    }
   } else {
-    (<HTMLInputElement>document.querySelector("#submit-button")).disabled = true;
+    submitButton.disabled = true;
   }
 }
 if (form) {
   form.addEventListener("submit", (e: Event) => {
     e.preventDefault();
-    const newUser = {
-      "username": validateUsername.value,
-      "password": validatePassword.value,
-      "email": validateEmail.value
-    }
-
-    const query = { "username": "alexandru.rusu" }
-    users.findOne(query)
-      .then(result => {
-        let user: any = result
-        if (result) {
-          console.log(`Successfully found document: ${result}.`)
-          console.log(user._id.toString());
-
-        } else {
-          console.log("No document matches the provided query.")
-        }
-      })
-      .catch(err => console.error(`Failed to find document: ${err}`))
-
-
 
     db.addUser(validateUsername.value, validateEmail.value, validatePassword.value)
-      .then(() => {
-        console.log("user already exists");
-        let p: Element = document.querySelector("#user-exists") as HTMLElement
-        (<HTMLElement>p).style.color = 'red';
-        p.textContent = "User already exists";
-        p.setAttribute("class", "text-center")
-
+      .then((errorCode) => {
+        generalErrorHandler(errorCode as number);
       })
   });
 }
@@ -154,6 +132,8 @@ function usernameInputErrorHandler(input: string): string {
     } else if (inputValidationRegex.containsSymbols.test(input)) {
       errorStr = 'Username can only contain letters, numbers and dot (.) symbol';
     }
+  } else if (input.length === 0) {
+    errorStr = 'Username is required';
   } else {
     errorStr = 'Username length must be greater than 5 characters';
   }
@@ -183,9 +163,12 @@ function passwordInputErrorHandler(input: string): string {
         errorArr.push("cannot contain caret (^) symbol");
       }
     }
+  } else if (input.length === 0) {
+    errorStr = 'Password is required';
   } else {
     errorStr = 'Password length must be greater than 8 characters';
   }
+
 
   if (errorArr.length === 1 && errorArr[0].includes("cannot")) {
     errorStr = "Password cannot contain caret (^) symbol";
@@ -198,14 +181,22 @@ function passwordInputErrorHandler(input: string): string {
 
 function passwordMatch(password: string, confirmed: string): boolean {
   if (password === confirmed) {
-    console.log('passwords match');
     return true;
   } else {
-    console.log("passwords don't match");
     return false;
   }
 }
 
-function generalErrorHandler(input: string) {
-
+function generalErrorHandler(input: string | number) {
+  if (input === 1) {
+    generalError.textContent = 'Username already exists';
+    generalError.style.visibility = 'visible';
+    submitButton.disabled = true;
+  } else if (input === 'password') {
+    generalError.textContent = 'Passwords do not match';
+    generalError.style.visibility = 'visible';
+    submitButton.disabled = true;
+  } else if (input === 'clear') {
+    generalError.style.visibility = 'hidden';
+  }
 }
