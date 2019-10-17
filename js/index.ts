@@ -1,14 +1,15 @@
 import { DB } from './db';
 import './stitch/stitchIndex';
 import { loginAnonymous, hasLoggedInUser } from './stitch/stitchIndex';
-import { categories, todos, users } from './stitch/mongodb';
-const query = { "completed":  false  };
 
 const db = new DB();
 let loginUsername: HTMLInputElement = document.querySelector("#login-username") as HTMLInputElement;
 let loginPassword: HTMLInputElement = document.querySelector("#login-password") as HTMLInputElement;
 let loginForm: HTMLFormElement = document.querySelector("#login-form") as HTMLFormElement;
-const generalError = document.querySelector(".general-error-login") as HTMLElement;
+
+const usernameInput = document.querySelector('.usernameInput') as HTMLElement;
+const passwordInput = document.querySelector('.passwordInput') as HTMLElement;
+const generalError = document.querySelector(".general-error") as HTMLElement;
 
 async function init() {
   loginAnonymous().then(() => {
@@ -42,9 +43,50 @@ async function init() {
     console.log("lol nice try lmao");
 
   }
+
+  loginUsername.addEventListener('blur', (e: Event) => {
+    let value = (<HTMLInputElement>e.target).value;
+    let errorString = usernameInputErrorHandler(value);
+
+    if (errorString.includes("valid")) {
+      loginUsername.removeAttribute("style");
+      usernameInput.style.visibility = "hidden";
+    } else {
+      loginUsername.setAttribute("style", "border: 2px solid red;");
+      usernameInput.textContent = errorString;
+      usernameInput.style.visibility = "visible";
+    }
+  });
+
+  loginPassword.addEventListener('blur', (e: Event) => {
+    let value = (<HTMLInputElement>e.target).value;
+    let errorString = passwordInputErrorHandler(value);
+
+    if (errorString.includes("valid")) {
+      loginPassword.removeAttribute("style");
+      passwordInput.style.visibility = "hidden";
+    } else {
+      loginPassword.setAttribute("style", "border: 2px solid red;");
+      passwordInput.textContent = errorString;
+      passwordInput.style.visibility = "visible";
+    }
+  });
 }
 init();
-// export { loginForm, loginUsername, loginPassword };
+
+function usernameInputErrorHandler(input: string): string {
+  if (input.length === 0) {
+    return 'Username is required';
+  }
+  return 'Input is valid';
+}
+
+function passwordInputErrorHandler(input: string): string {
+  if (input.length === 0) {
+    return 'Password is required';
+  }
+  return 'Input is valid';
+}
 
 function generalErrorHandler(input: number | string) {
   if (input === 1) {

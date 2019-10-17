@@ -1,5 +1,4 @@
 import { DB } from './db';
-import { categories, todos, users } from './stitch/mongodb';
 import { inputValidationRegex } from './utils';
 const db = new DB();
 
