@@ -82,14 +82,14 @@ class DB {
             const user: any = await this.getUser(username);
             if (user.password === password) {
                 sessionStorage.setItem('loggedUser', user._id.toString());
-                return 0;
+                return 0; // good username and password
             } else {
                 console.log('password is invalid');
-                return 2;
+                return 2; // wrong password for current user
             }
         } else {
             console.log(`user ${username} does not exist in database`);
-            return 1;
+            return 1; // username does not exist in database
         }
     }
 
@@ -126,7 +126,7 @@ class DB {
             users.findOne(query)
                 .then(result => {
                     if (result) {
-                        resolve(1); // user already exists
+                        resolve(4); // user already exists
                     } else {
                         console.log("No document matches the provided query.")
                         users.insertOne(newUser)

@@ -187,7 +187,7 @@ function passwordMatch(password: string, confirmed: string): boolean {
 }
 
 function generalErrorHandler(input: string | number) {
-  if (input === 1) {
+  if (input === 4) {
     generalError.textContent = 'Username already exists';
     generalError.style.visibility = 'visible';
     submitButton.disabled = true;
