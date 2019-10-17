@@ -1,27 +1,15 @@
 import { DB } from './db';
 import './stitch/stitchIndex';
 import { loginAnonymous, hasLoggedInUser } from './stitch/stitchIndex';
-import { categories, todos, users } from './stitch/mongodb';
-console.log(todos);
-const query = { "completed":  false  };
-
-todos.find(query).toArray()
-  .then(items => {
-    console.log(`Successfully found ${items.length} documents.`)
-    items.forEach(console.log)
-    items.forEach((element: any) => {
-      console.log(element.owner_id);
-      
-    });
-    return items
-  })
-  .catch(err => console.error(`Failed to find documents: ${err}`))
 
 const db = new DB();
-//let loginButton: Element = document.querySelector("#login-button") as HTMLElement;
 let loginUsername: HTMLInputElement = document.querySelector("#login-username") as HTMLInputElement;
 let loginPassword: HTMLInputElement = document.querySelector("#login-password") as HTMLInputElement;
 let loginForm: HTMLFormElement = document.querySelector("#login-form") as HTMLFormElement;
+
+const usernameInput = document.querySelector('.usernameInput') as HTMLElement;
+const passwordInput = document.querySelector('.passwordInput') as HTMLElement;
+const generalError = document.querySelector(".general-error") as HTMLElement;
 
 async function init() {
   loginAnonymous().then(() => {
@@ -33,11 +21,9 @@ async function init() {
       e.preventDefault();
       db.loginUser(loginUsername.value, loginPassword.value)
         .then((verdict) => {
-          if (verdict === true) {
-            console.log(window.location);
+          generalErrorHandler(verdict);
+          if (verdict === 0) {
             let location = window.location.href;
-            //location = location.replace("index.html", "notes.html");
-            //location = location + "/notes.html";
             if (location.includes("index.html")) {
               location = location.replace("index.html", "notes.html");
             } else {
@@ -47,8 +33,7 @@ async function init() {
           }
         })
         .catch((error) => {
-          let errMessage: Element = document.querySelector("#error-message") as HTMLElement;
-          errMessage.textContent = "Incorrect username or password or user does not exist.";
+          generalError.textContent = "xxxxxxxxx";
           console.log("user does not exist");
 
         });
@@ -58,8 +43,59 @@ async function init() {
     console.log("lol nice try lmao");
 
   }
+
+  loginUsername.addEventListener('blur', (e: Event) => {
+    let value = (<HTMLInputElement>e.target).value;
+    let errorString = usernameInputErrorHandler(value);
+
+    if (errorString.includes("valid")) {
+      loginUsername.removeAttribute("style");
+      usernameInput.style.visibility = "hidden";
+    } else {
+      loginUsername.setAttribute("style", "border: 2px solid red;");
+      usernameInput.textContent = errorString;
+      usernameInput.style.visibility = "visible";
+    }
+  });
+
+  loginPassword.addEventListener('blur', (e: Event) => {
+    let value = (<HTMLInputElement>e.target).value;
+    let errorString = passwordInputErrorHandler(value);
+
+    if (errorString.includes("valid")) {
+      loginPassword.removeAttribute("style");
+      passwordInput.style.visibility = "hidden";
+    } else {
+      loginPassword.setAttribute("style", "border: 2px solid red;");
+      passwordInput.textContent = errorString;
+      passwordInput.style.visibility = "visible";
+    }
+  });
 }
 init();
-// export { loginForm, loginUsername, loginPassword };
 
+function usernameInputErrorHandler(input: string): string {
+  if (input.length === 0) {
+    return 'Username is required';
+  }
+  return 'Input is valid';
+}
 
+function passwordInputErrorHandler(input: string): string {
+  if (input.length === 0) {
+    return 'Password is required';
+  }
+  return 'Input is valid';
+}
+
+function generalErrorHandler(input: number | string) {
+  if (input === 1) {
+    generalError.textContent = 'Username does not exist';
+    generalError.style.visibility = 'visible';
+  } else if (input === 2) {
+    generalError.textContent = 'Wrong password';
+    generalError.style.visibility = 'visible';
+  } else if (input === 'clear') {
+    generalError.style.visibility = 'hidden';
+  }
+}
