@@ -3,60 +3,7 @@ const BSON = require('bson');
 
 class DB {
 
-    db: IDBDatabase | any;
-    openedDB: IDBOpenDBRequest | any;
-    loaded: boolean = false;
-    constructor() {
-        this.init();
-    }
-
-    init() {
-        this.openedDB = window.indexedDB.open('notes_db');
-        this.openedDB.onerror = this.onDatabaseError;
-        this.openedDB.onsuccess = this.onDatabaseSuccess;
-        this.openedDB.onupgradeneeded = this.onDatabaseUpgradeNeeded;
-    }
-
-    onDatabaseError = (e: Event) => {
-        console.log(e);
-    }
-
-    onDatabaseSuccess = () => {
-        console.log(this.openedDB.readyState);
-        this.db = this.openedDB.result;
-        this.loaded = true;
-    }
-
-    onDatabaseUpgradeNeeded = (e: any) => {
-        let db = (e.target as IDBOpenDBRequest).result;
-
-        let objectStore = db.createObjectStore('user', { keyPath: 'id', autoIncrement: true });
-        let objectStore2 = db.createObjectStore('todos', { keyPath: 'id', autoIncrement: true });
-        let objectStore3 = db.createObjectStore('finished-todos', { keyPath: 'id', autoIncrement: true });
-        let objectStore4 = db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
-
-        objectStore.createIndex('username', 'username', { unique: false });
-        objectStore.createIndex('email', 'email', { unique: false });
-        objectStore.createIndex('password', 'password', { unique: false });
-
-        objectStore2.createIndex('todo', 'todo', { unique: false });
-        objectStore2.createIndex('loggedUser', 'loggedUser', { unique: false });
-        objectStore2.createIndex('completed', 'completed', { unique: false });
-        objectStore2.createIndex('category', 'category', { unique: false });
-        objectStore2.createIndex('color', 'color', { unique: false });
-        objectStore2.createIndex('dueDate', 'dueDate', { unique: false });
-
-        objectStore3.createIndex('todo', 'todo', { unique: false });
-        objectStore3.createIndex('loggedUser', 'loggedUser', { unique: false });
-
-        objectStore4.createIndex('category', 'category', { unique: false });
-        objectStore4.createIndex('color', 'color', { unique: false });
-        objectStore4.createIndex('loggedUser', 'loggedUser', { unique: false });
-
-        objectStore.transaction.oncomplete = function (e: Event) {
-            console.log('Database setup complete');
-        };
-    }
+    /* ////////////////////////////// USER OPERATIONS ///////////////////////////////// */
 
     userExists = async (username: string) => {
         const query = { "username": { "$eq": username } };
@@ -84,7 +31,6 @@ class DB {
                 sessionStorage.setItem('loggedUser', user._id.toString());
                 return true;
             } else {
-                console.log('password is invalid');
                 return false;
             }
         } else {
@@ -93,31 +39,6 @@ class DB {
         }
     }
 
-    /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
-    addNewNote(newNote: string, category: string, color: any, newDate: string) {
-        return new Promise((resolve, reject) => {
-            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), category_name: category, completed: false, todo: newNote, due_date: newDate, color: color };
-            todos.insertOne(createTodo)
-                .then(result => {
-                    console.log(`Successfully inserted item with _id: ${result.insertedId}`)
-                    resolve();
-                })
-                .catch(err => console.error(`Failed to insert item: ${err}`))
-        })
-
-        // let transaction = this.db.transaction(['todos'], "readwrite");
-        // let objectStore = transaction.objectStore('todos');
-        // if (newNote !== '') {
-        //     let request = objectStore.add(createTodo);
-        //     request.onsuccess = function () {
-        //         // Clear the form, ready for adding the next entry
-        //         //newNote = '';
-        //     };
-        // }
-        // transaction.oncomplete = () => {
-        //     this.printTodos();
-        // }
-    }
 
     addUser(username: string, email: string, password: string) {
         let found: boolean = false;
@@ -141,7 +62,19 @@ class DB {
 
     }
 
-    /* ///////////////////////////////// PRINT TODOS /////////////////////////////// */
+    /* /////////////////////////////////TODOS /////////////////////////////// */
+    /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
+    addNewNote(newNote: string, newNoteDescription: string, category: string, color: any, newDate: any) {
+        return new Promise((resolve, reject) => {
+            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
+            todos.insertOne(createTodo)
+                .then(result => {
+                    console.log(`Successfully inserted item with _id: ${result.insertedId}`)
+                    resolve();
+                })
+                .catch(err => console.error(`Failed to insert item: ${err}`))
+        });
+    }
     printTodos() {
         return new Promise((resolve, reject) => {
             const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: false };
@@ -163,62 +96,64 @@ class DB {
                 .catch(err => console.error(`Failed to find documents: ${err}`))
         });
     }
-    printTodosByCategory = (category: string, date: any, startDate: any, endDate: any) => {
+
+    printTodosByCategory = (date: any, checkedCategory: string[]) => {
         return new Promise((resolve, reject) => {
-            let objectStore = this.db.transaction('todos').objectStore('todos');
-            let todosByCategory: any = [];
-            objectStore.openCursor().onsuccess = (e: any) => {
-                let cursor = e.target.result as IDBCursorWithValue;
-                if (cursor) {
-                    if (startDate !== '' && endDate !== '') {
-                        if (cursor.value.category === category && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (cursor.value.category === category && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (category === 'Display all todos' && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (category === 'Display all todos' && (Number(new Date(cursor.value.dueDate)) >= Number(new Date(startDate)) && Number(new Date(cursor.value.dueDate)) <= Number(new Date(endDate)))) {
-                            todosByCategory.push(cursor.value);
-                        }
-                    } else {
-                        if (cursor.value.category === category && date.includes(cursor.value.dueDate)) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (cursor.value.category === category && date[0] === 0) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (category === 'Display all todos' && date.includes(cursor.value.dueDate)) {
-                            todosByCategory.push(cursor.value);
-                        }
-                        if (category === 'Display all todos' && date[0] === 0) {
-                            todosByCategory.push(cursor.value);
-                        }
-                    }
-                    cursor.continue();
+            let query: any = {};
+            if (date.length > 0) {
+                if (date.length === 2) {
+                    query = { owner_id: sessionStorage.getItem("loggedUser"), due_date: { $gt: date[0], $lt: date[1] } };
                 } else {
-                    resolve(todosByCategory);
+                    query = { owner_id: sessionStorage.getItem("loggedUser"), due_date: { $in: date } };
                 }
             }
+            if (checkedCategory.length > 0) {
+                query["category_name"] = { $in: checkedCategory };
+            }
+            todos.find(query).toArray()
+                .then(items => {
+                    resolve(items);
+                })
+                .catch(err => console.error(`Failed to find documents: ${err}`))
+        });
+    }
+
+    getTodoInfo = (todoId: String) => {
+        return new Promise((resolve, reject) => {
+            const query = { _id: new BSON.ObjectId(todoId) }
+            todos.findOne(query)
+                .then(result => {
+                    let user: any = result
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        console.log("No document matches the provided query.")
+                    }
+                })
+                .catch(err => console.error(`Failed to find document: ${err}`))
+        });
+    }
+
+    updateTodo = (editTitle: String, editDescription: String, editDate: any, editCategory: String, color: any, todoId: any) => {
+        const query = { owner_id: sessionStorage.getItem("loggedUser"), _id: new BSON.ObjectId(todoId) };
+        return new Promise((resolve, rejects) => {
+            console.log(editTitle, editDescription, editDate, editCategory, color, todoId);
+            const update = { "$set": { category_name: editCategory, todo: editTitle, description: editDescription, due_date: editDate, color: color } };
+            todos.updateOne(query, update)
+                .then(result => {
+                    const { matchedCount, modifiedCount } = result;
+                    if (matchedCount && modifiedCount) {
+                        console.log(`Successfully updated the item.`);
+                        resolve();
+                    }
+                })
+                .catch(err => console.error(`Failed to update the item: ${err}`))
         });
     }
 
     markCompletedNote = (todoId: any, checked: boolean) => {
-
         const filterDoc = { _id: new BSON.ObjectId(todoId) };
         return new Promise((resolve, reject) => {
-            const query = { owner_id: sessionStorage.getItem("loggedUser"), _id: todoId };
-            // todos.find(filterDoc).toArray()
-            //     .then(items => {
-            //         console.log("yes")
-            //         console.log(items);
-
-            //         resolve(items);
-            //     })
-            //     .catch(err => console.error(`Failed to find documents: ${err}`))
-            //const query = { owner_id: sessionStorage.getItem("loggedUser"), todoId };
             const update = { "$set": { completed: checked } };
             todos.updateOne(filterDoc, update)
                 .then(result => {
@@ -272,31 +207,11 @@ class DB {
                     }
                 })
                 .catch(err => console.error(`Failed to find document: ${err}`))
-        })
-        // let transaction = this.db.transaction(['categories'], 'readwrite');
-        // let objectStore = transaction.objectStore('categories');
-        // return new Promise((resolve, reject) => {
-        //     this.categoryExists(objectStore, category)
-        //         .then((found) => {
-        //             if (category !== '') {
-        //                 let request = objectStore.add(newCategory);
-        //                 request.onsuccess = function (e: Event) {
-        //                     resolve();
-        //                 }
-        //                 transaction.oncomplete = function () {
-        //                     console.log("new data added");
-        //                 };
-        //                 transaction.onerror = function () {
-        //                     console.log('Transaction not opened due to error');
-
-        //                 };
-        //             }
-
-        //         })
-        // });
+        });
     }
 
     editCategory = (newCatName: string, currentCategory: string) => {
+        console.log("hey");
         const query = { owner_id: sessionStorage.getItem("loggedUser"), name: currentCategory };
         return new Promise((resolve, rejects) => {
             const update = { "$set": { name: newCatName } };
@@ -310,36 +225,6 @@ class DB {
                 })
                 .catch(err => console.error(`Failed to update the item: ${err}`))
         });
-        // return new Promise((resolve, reject) => {
-        //     let transaction = this.db.transaction(['categories'], 'readwrite');
-        //     let objectStore = transaction.objectStore('categories');
-        //     objectStore.openCursor().onsuccess = (e: any) => {
-        //         let cursor = e.target.result as IDBCursorWithValue;
-        //         if (cursor) {
-        //             if (cursor.value.category === currentCategory) {
-        //                 let secondTransaction = this.db.transaction(['todos'], 'readwrite');
-        //                 let secondObjectStore = secondTransaction.objectStore('todos');
-        //                 secondObjectStore.openCursor().onsuccess = (e: any) => {
-        //                     let cursor = e.target.result as IDBCursorWithValue;
-        //                     if (cursor) {
-        //                         if (cursor.value.category === currentCategory) {
-        //                             let data = cursor.value;
-        //                             data.category = newCatName;
-        //                             let requestUpdate = secondObjectStore.put(data);
-        //                         }
-        //                         cursor.continue();
-        //                     }
-        //                 }
-        //                 let data = cursor.value;
-        //                 data.category = newCatName;
-        //                 let requestUpdate = objectStore.put(data);
-        //             }
-        //             cursor.continue();
-        //         } else {
-        //             resolve();
-        //         }
-        //     }
-        // })
     }
 
     removeCategory = (catId: number, catName: any) => {
@@ -376,19 +261,6 @@ class DB {
                     resolve(items);
                 })
                 .catch(err => console.error(`Failed to find documents: ${err}`))
-            // let objectStore = this.db.transaction('categories').objectStore('categories');
-            // let allCategories: any = [];
-            // objectStore.openCursor().onsuccess = (e: any) => {
-            //     let cursor = e.target.result as IDBCursorWithValue;
-            //     if (cursor) {
-            //         if (sessionStorage.getItem("loggedUser") === cursor.value.loggedUser) {
-            //             allCategories.push(cursor.value);
-            //         }
-            //         cursor.continue();
-            //     } else {
-            //         resolve(allCategories);
-            //     }
-            // }
         });
     }
 

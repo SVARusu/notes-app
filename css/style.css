@@ -32,6 +32,27 @@
 .section-title{
   font-weight: 600;
 }
+/* ????????????????????????????? TODO CONTENT ???????????????????????? */
+.printed-note{
+  border-radius: 5px;
+}
+.active, .printed-note:hover{
+  background: rgb(230, 230, 230);
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  
+}
+
+.todo-edit-button{
+  font-size: 12px;
+  padding-bottom: 0;
+  padding-top: 0;
+}
 /* ///////////////// TOOTLTIP FOR REGISTER PAGE ///////////////// */
 .tooltiptext {
   visibility: hidden;
@@ -71,7 +92,7 @@
   padding: 0;
 }
 
-#new-note, #selected-category, #new-date, #note-button, #manage-category-button, #date-picker{
+#new-note, #selected-category, #new-date, #note-button, #manage-category-button, #date-picker, #new-note-description{
   border-radius: 15px;
 }
 #date-picker{
@@ -82,7 +103,7 @@ input::-webkit-input-placeholder {
   text-align: center;
 }
 /* ??????????????????????? CHECKBOX STYLE ????????????????????????? */
-.cat-list{
+.cat-list, .todo-list{
   list-style: none;
 }
 
@@ -90,11 +111,7 @@ input::-webkit-input-placeholder {
   display: block;
   position: relative;
   padding-left: 35px;
-  margin-bottom: 12px;
   cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 .checkmark {
@@ -165,3 +182,5 @@ input[type="checkbox"] {
 #selected-category{
   text-align-last: center;
 }
+
+
