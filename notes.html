@@ -21,7 +21,7 @@
 </head>
 
 <body class="notes-body">
-    <p style="width: 20px; height: 20px; background: black;"></p>
+    <!-- CATEGORIES MODAL -->
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -68,6 +68,54 @@
             </div>
         </div>
     </div>
+    <!-- EDIT TODO MODAL -->
+    <div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Edit your todo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <article class="card-body mx-auto mb-3">
+                        <div class="mx-auto">
+                            <form action="" id="edit-form">
+                                <div class="form-group">
+                                    <label for="edit-title" class="font-weight-bold">Title</label>
+                                    <input type="text" class="form-control" id="edit-title" placeholder="Todo title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-description" class="font-weight-bold">Description</label>
+                                    <textarea name="message" class="form-control" rows="5" cols="30" id="edit-description"
+                                        placeholder="Todo description"></textarea>
+                                </div>
+                                <div class="form-group ">
+                                    <label for="edit-date" class="font-weight-bold">Due date</label>
+                                    <!-- <input type="date" class="form-control" id="new-date"> -->
+                                    <input type="text" class="form-control text-center" id="edit-date" placeholder="dd/mm/yyyy">
+                                </div>
+                                <div class="form-group ">
+                                    <label for="edit-category" class="font-weight-bold">Category</label>
+                                    <!-- <p id="color-box"></p> -->
+                                    <select class="form-control" id="edit-category">
+                                        
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </article>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" type="submit" class="btn btn-primary" id="save-changes" data-dismiss="modal" form="edit-form">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-3">
@@ -93,22 +141,22 @@
                                 <p class="section-title">Date</p>
                                 <li class="d-flex">
                                     <label class="check-label">Today
-                                        <input type="checkbox" name="" id="today-checkbox" class="my-auto mr-2 annoying">
-                                        
+                                        <input type="checkbox" id="today-checkbox" class="my-auto mr-2 annoying">
+
                                         <span class="checkmark"></span>
                                     </label>
 
                                 </li>
                                 <li class="d-flex">
-                                    <label class="check-label">
-                                        <input type="checkbox" name="" id="week-checkbox" class="my-auto mr-2 annoying">
-                                        <span class="my-auto">This Week</span>
+                                    <label class="check-label">This Week
+                                        <input type="checkbox" id="week-checkbox" class="my-auto mr-2 annoying">
+
                                         <span class="checkmark"></span>
                                     </label>
                                 </li>
                                 <li class="d-flex">
                                     <label class="range-label check-label">
-                                        <input type="checkbox" name="" id="date-picker-checkbox" class="my-auto mr-2 annoying">
+                                        <input type="checkbox" id="date-picker-checkbox" class="my-auto mr-2 annoying">
                                         <input type="text" class="range-input" id="date-picker" placeholder="dd/mm/yyyy - dd/mm/yyyy">
                                         <span class="checkmark"></span>
                                     </label>
@@ -121,8 +169,6 @@
                             </div>
                             <ul class="unstyled-list mb-3 cat-list" id="cat-list">
 
-
-
                             </ul>
                         </li>
                     </ul>
@@ -132,11 +178,17 @@
                 <div class="col-md-12 mb-5 ">
                     <button href="" class="nav-link btn pull-right" id="logout-button">Log out <i class="fas fa-sign-out-alt"></i></button>
                 </div>
-                <div class="col-sm-8 col-md-8 col-lg-8 col-xl-12 mb-5">
+                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-5">
                     <form action="" id="note-form" class="form-row">
                         <div class="form-group col-md-12 col-sm-12">
                             <label for="new-note">Todo description</label>
-                            <input type="text" class="form-control" id="new-note" placeholder="ToDo description">
+                            <input type="text" class="form-control" id="new-note" placeholder="Todo title">
+                        </div>
+                        <div class="form-group col-md-12 col-sm-12">
+                            <!-- 
+                            <input type="text-area" class="form-control" id="new-note-description" placeholder="ToDo description"> -->
+                            <textarea name="message" class="form-control" rows="5" cols="30" id="new-note-description"
+                                placeholder="Todo description"></textarea>
                         </div>
                         <div class="col-md-12">
                             <p>Category</p>
@@ -202,8 +254,13 @@
             field: document.getElementById('new-date'),
             singleDate: true,
         }
+        var options3 = {
+            field: document.getElementById('edit-date'),
+            singleDate: true,
+        }
         var picker = new Lightpick(options);
         var picker2 = new Lightpick(options2);
+        var picker3 = new Lightpick(options3);
     </script>
 </body>
 
