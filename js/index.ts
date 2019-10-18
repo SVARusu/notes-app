@@ -12,7 +12,12 @@ const passwordInput = document.querySelector('.passwordInput') as HTMLElement;
 const generalError = document.querySelector(".general-error") as HTMLElement;
 
 async function init() {
-  loginAnonymous().then(() => {
+  loginAnonymous().then((resp: any) => {
+    // handle error function, daca e empty don't do anything
+    // daca e ceva numar, send errorcode si resp message
+    if (resp.errorCode === 46) {
+      console.log(`${resp.errorCode}, ${resp.message}`);
+    }
     console.log('Anonymous user logged in: ', hasLoggedInUser());
   })
 
@@ -35,13 +40,11 @@ async function init() {
         .catch((error) => {
           generalError.textContent = "xxxxxxxxx";
           console.log("user does not exist");
-
         });
 
     });
   } else {
     console.log("lol nice try lmao");
-
   }
 
   loginUsername.addEventListener('blur', (e: Event) => {

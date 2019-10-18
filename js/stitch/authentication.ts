@@ -4,7 +4,14 @@ import { stitchApp } from "./stitchapp";
 export function loginAnonymous() {
   // Allow users to log in anonymously
   const credential = new AnonymousCredential();
-  return stitchApp.auth.loginWithCredential(credential);
+  return stitchApp.auth.loginWithCredential(credential)
+    .catch((e) => {
+      console.log(e);
+      return ({
+        errorCode: e.errorCode,
+        message: e.message
+      })
+    })
 }
 
 export function hasLoggedInUser() {
