@@ -29,27 +29,26 @@ class DB {
             const user: any = await this.getUser(username);
             if (user.password === password) {
                 sessionStorage.setItem('loggedUser', user._id.toString());
-                return true;
+                return 0; // good username and password
             } else {
-                return false;
+                console.log('password is invalid');
+                return 2; // wrong password for current user
             }
         } else {
             console.log(`user ${username} does not exist in database`);
-            return false;
+            return 1; // username does not exist in database
         }
     }
 
 
     addUser(username: string, email: string, password: string) {
-        let found: boolean = false;
         let newUser = { username: username, password: password, email: email };
         const query = { "username": username }
         return new Promise((resolve, reject) => {
             users.findOne(query)
                 .then(result => {
-                    let user: any = result
                     if (result) {
-                        resolve();
+                        resolve(4); // user already exists
                     } else {
                         console.log("No document matches the provided query.")
                         users.insertOne(newUser)
