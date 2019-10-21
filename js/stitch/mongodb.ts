@@ -1,7 +1,6 @@
 import { RemoteMongoClient } from "mongodb-stitch-browser-sdk";
 import { stitchApp } from "./stitchapp";
 
-
 // Initialize a MongoDB Service Client
 const mongoClient = stitchApp.getServiceClient(
   RemoteMongoClient.factory,
