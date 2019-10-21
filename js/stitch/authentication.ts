@@ -6,10 +6,9 @@ export function loginAnonymous() {
   const credential = new AnonymousCredential();
   return stitchApp.auth.loginWithCredential(credential)
     .catch((e) => {
-      console.log(e);
       return ({
-        errorCode: e.errorCode,
-        message: e.message
+        errorCode: e.errorCode as number,
+        message: e.message as string
       })
     })
 }

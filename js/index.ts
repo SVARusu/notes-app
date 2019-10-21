@@ -13,10 +13,8 @@ const generalError = document.querySelector(".general-error") as HTMLElement;
 
 async function init() {
   loginAnonymous().then((resp: any) => {
-    // handle error function, daca e empty don't do anything
-    // daca e ceva numar, send errorcode si resp message
-    if (resp.errorCode === 46) {
-      console.log(`${resp.errorCode}, ${resp.message}`);
+    if (resp.errorCode) {
+      generalErrorHandler(resp);
     }
     console.log('Anonymous user logged in: ', hasLoggedInUser());
   })
@@ -91,12 +89,15 @@ function passwordInputErrorHandler(input: string): string {
   return 'Input is valid';
 }
 
-function generalErrorHandler(input: number | string) {
+function generalErrorHandler(input: number | string | any) {
   if (input === 1) {
     generalError.textContent = 'Username does not exist';
     generalError.style.visibility = 'visible';
   } else if (input === 2) {
     generalError.textContent = 'Wrong password';
+    generalError.style.visibility = 'visible';
+  } else if (typeof input === 'object') {
+    generalError.textContent = `ErrorCode ${input.errorCode}, ${input.message}`;
     generalError.style.visibility = 'visible';
   } else if (input === 'clear') {
     generalError.style.visibility = 'hidden';
