@@ -40,23 +40,22 @@ class DB {
         }
     }
 
-
     addUser(username: string, email: string, password: string) {
         let newUser = { username: username, password: password, email: email };
         const query = { "username": username }
         return new Promise((resolve, reject) => {
             users.findOne(query)
-                .then(result => {
+                .then((result: any) => {
                     if (result) {
                         resolve(4); // user already exists
                     } else {
                         console.log("No document matches the provided query.")
                         users.insertOne(newUser)
-                            .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
-                            .catch(err => console.error(`Failed to insert item: ${err}`))
+                            .then((result: { insertedId: any; }) => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
+                            .catch((err: any) => console.error(`Failed to insert item: ${err}`))
                     }
                 })
-                .catch(err => console.error(`Failed to find document: ${err}`))
+                .catch((err: any) => console.error(`Failed to find document: ${err}`))
         })
 
     }
@@ -71,17 +70,17 @@ class DB {
                     console.log(`Successfully inserted item with _id: ${result.insertedId}`)
                     resolve();
                 })
-                .catch(err => console.error(`Failed to insert item: ${err}`))
+                .catch((err: any) => console.error(`Failed to insert item: ${err}`))
         });
     }
     printTodos() {
         return new Promise((resolve, reject) => {
             const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: false };
             todos.find(query).toArray()
-                .then(items => {
+                .then((items: any) => {
                     resolve(items);
                 })
-                .catch(err => console.error(`Failed to find documents: ${err}`))
+                .catch((err: any) => console.error(`Failed to find documents: ${err}`))
         })
     }
 
@@ -89,10 +88,10 @@ class DB {
         return new Promise((resolve, reject) => {
             const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: true };
             todos.find(query).toArray()
-                .then(items => {
+                .then((items: any) => {
                     resolve(items);
                 })
-                .catch(err => console.error(`Failed to find documents: ${err}`))
+                .catch((err: any) => console.error(`Failed to find documents: ${err}`))
         });
     }
 
@@ -155,14 +154,14 @@ class DB {
         return new Promise((resolve, reject) => {
             const update = { "$set": { completed: checked } };
             todos.updateOne(filterDoc, update)
-                .then(result => {
+                .then((result: { matchedCount: any; modifiedCount: any; }) => {
                     const { matchedCount, modifiedCount } = result;
                     if (matchedCount && modifiedCount) {
                         console.log(`Successfully updated the item.`);
                         resolve();
                     }
                 })
-                .catch(err => console.error(`Failed to update the item: ${err}`))
+                .catch((err: any) => console.error(`Failed to update the item: ${err}`))
         });
     }
 
@@ -192,7 +191,7 @@ class DB {
         const query = { owner_id: sessionStorage.getItem("loggedUser"), name: category };
         return new Promise((resolve, reject) => {
             categories.findOne(query)
-                .then(result => {
+                .then((result: any) => {
                     let user: any = result
                     if (result) {
                         found = true;
@@ -201,8 +200,8 @@ class DB {
                         console.log("No document matches the provided query.")
                         resolve(found);
                         categories.insertOne(newCategory)
-                            .then(result => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
-                            .catch(err => console.error(`Failed to insert item: ${err}`))
+                            .then((result: { insertedId: any; }) => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
+                            .catch((err: any) => console.error(`Failed to insert item: ${err}`))
                     }
                 })
                 .catch(err => console.error(`Failed to find document: ${err}`))
@@ -215,14 +214,14 @@ class DB {
         return new Promise((resolve, rejects) => {
             const update = { "$set": { name: newCatName } };
             categories.updateOne(query, update)
-                .then(result => {
+                .then((result: { matchedCount: any; modifiedCount: any; }) => {
                     const { matchedCount, modifiedCount } = result;
                     if (matchedCount && modifiedCount) {
                         console.log(`Successfully updated the item.`);
                         resolve();
                     }
                 })
-                .catch(err => console.error(`Failed to update the item: ${err}`))
+                .catch((err: any) => console.error(`Failed to update the item: ${err}`))
         });
     }
 
@@ -231,7 +230,7 @@ class DB {
         return new Promise((resolve, rejects) => {
             const update = { "$set": { removed: true } };
             categories.updateOne(query, update)
-                .then(result => {
+                .then((result: { matchedCount: any; modifiedCount: any; upsertedId: any; }) => {
                     const { matchedCount, modifiedCount, upsertedId } = result;
                     if (upsertedId) {
                         console.log(`Document not found. Inserted a new document with _id: ${upsertedId}`)
@@ -240,15 +239,15 @@ class DB {
                         const query = { owner_id: sessionStorage.getItem("loggedUser"), category_name: catName };
                         const update = { "$set": { category_name: "default" } };
                         todos.updateMany(query, update)
-                            .then(result => {
+                            .then((result: { matchedCount: any; modifiedCount: any; }) => {
                                 const { matchedCount, modifiedCount } = result;
                                 console.log(`Successfully matched ${matchedCount} and modified ${modifiedCount} items.`)
                                 resolve();
                             })
-                            .catch(err => console.error(`Failed to update items: ${err}`))
+                            .catch((err: any) => console.error(`Failed to update items: ${err}`))
                     }
                 })
-                .catch(err => console.error(`Failed to upsert document: ${err}`))
+                .catch((err: any) => console.error(`Failed to upsert document: ${err}`))
         });
     }
 
@@ -256,10 +255,10 @@ class DB {
         return new Promise((resolve, reject) => {
             const query = { owner_id: sessionStorage.getItem("loggedUser"), removed: false };
             categories.find(query).toArray()
-                .then(items => {
+                .then((items: any) => {
                     resolve(items);
                 })
-                .catch(err => console.error(`Failed to find documents: ${err}`))
+                .catch((err: any) => console.error(`Failed to find documents: ${err}`))
         });
     }
 

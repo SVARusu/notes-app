@@ -12,7 +12,10 @@ const passwordInput = document.querySelector('.passwordInput') as HTMLElement;
 const generalError = document.querySelector(".general-error") as HTMLElement;
 
 async function init() {
-  loginAnonymous().then(() => {
+  loginAnonymous().then((resp: any) => {
+    if (resp.errorCode) {
+      generalErrorHandler(resp);
+    }
     console.log('Anonymous user logged in: ', hasLoggedInUser());
   })
 
@@ -35,13 +38,11 @@ async function init() {
         .catch((error) => {
           generalError.textContent = "xxxxxxxxx";
           console.log("user does not exist");
-
         });
 
     });
   } else {
     console.log("lol nice try lmao");
-
   }
 
   loginUsername.addEventListener('blur', (e: Event) => {
@@ -88,12 +89,15 @@ function passwordInputErrorHandler(input: string): string {
   return 'Input is valid';
 }
 
-function generalErrorHandler(input: number | string) {
+function generalErrorHandler(input: number | string | any) {
   if (input === 1) {
     generalError.textContent = 'Username does not exist';
     generalError.style.visibility = 'visible';
   } else if (input === 2) {
     generalError.textContent = 'Wrong password';
+    generalError.style.visibility = 'visible';
+  } else if (typeof input === 'object') {
+    generalError.textContent = `ErrorCode ${input.errorCode}, ${input.message}`;
     generalError.style.visibility = 'visible';
   } else if (input === 'clear') {
     generalError.style.visibility = 'hidden';
