@@ -54,6 +54,18 @@
   padding-bottom: 0;
   padding-top: 0;
 }
+
+.user-par{
+  display: inline-block;
+  height: 25px;
+  background: rgb(226, 225, 225);
+  border-radius: 5px;
+}
+.user-par button {
+  padding: 0;
+  margin-bottom: 3px;
+  color: rgb(190, 190, 190);
+}
 /* ///////////////// TOOTLTIP FOR REGISTER PAGE ///////////////// */
 .tooltiptext {
   position: absolute;
@@ -198,5 +210,84 @@ input[type="checkbox"] {
 #selected-category{
   text-align-last: center;
 }
+
+
+#match-list{
+  width: 86.5%;
+  position: absolute;
+  z-index: 99;
+}
+
+.over{
+  position: relative;
+  z-index: 1000;
+  background: rgb(214, 214, 214);
+}
+.over:hover {
+  background: gray;
+}
+
+
+/* @keyframes rotate {
+	100% {
+		transform: rotate(1turn);
+	}
+}
+
+.rainbow {
+	position: relative;
+	z-index: 0;
+	border-radius: 10px;
+	overflow: hidden;
+	padding: 2rem;
+}
+
+
+.rainbow::before {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: -100%;
+  top: -50%;
+  width: 300%;
+  height: 400%;
+  background-color: #399953;
+  background-repeat: no-repeat;
+  background-size: 50% 50%, 50% 50%;
+  background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  background-image: linear-gradient(#399953, #399953), linear-gradient(#fbb300, #fbb300), linear-gradient(#d53e33, #d53e33), linear-gradient(#377af5, #377af5);
+  animation: rotate 4s linear infinite;
+}
+
+.rainbow::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 6px;
+  top: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  background: white;
+  border-radius: 5px;
+}
+
+#share-button{
+  animation: fun-color 4s infinite;
+  color: white;
+}
+
+@keyframes fun-color {
+  0% {background-color: hotpink;}
+  10% {background-color: red;}
+  20% {background-color: rgb(230, 165, 80);}
+  30% {background-color: orange;}
+  40% {background-color: yellow;}
+  50% {background-color: green;}
+  60% {background-color: rgb(54, 230, 38);}
+  70% {background-color: turquoise;}
+  80% {background-color: blue;}
+  90% {background-color: indigo;}
+  100% {background-color: violet;}
+} */
 
 
