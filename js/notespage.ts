@@ -8,6 +8,8 @@ let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInput
 let newNoteDescription = document.querySelector("#new-note-description") as HTMLTextAreaElement
 let newDate: HTMLInputElement = document.querySelector('#new-date') as HTMLInputElement;
 let notesForm: HTMLFormElement = document.querySelector("#note-form") as HTMLFormElement;
+const addNoteSubmitButton = document.querySelector("#add-note") as HTMLButtonElement;
+
 let notesList: HTMLElement = document.querySelector("#note-list") as HTMLElement;
 let completedNotesList: HTMLElement = document.querySelector("#completed-note-list") as HTMLElement;
 let viewCompletedTodos: HTMLElement = document.querySelector("#view-completed-todos") as HTMLElement;
@@ -86,7 +88,7 @@ function init() {
         window.location.href = location;
     })
     printEveryTodo();
-    notesForm.addEventListener("submit", (e: Event) => {
+    addNoteSubmitButton.addEventListener("click", (e: Event) => {
         let color = selectedCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute');
         let categoryValue = Number(selectedCategory.value);
         let category = selectedCategory.value;
