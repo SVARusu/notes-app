@@ -197,64 +197,43 @@ function init() {
     function selectClickedUser(e: Event) {
         matchList.innerHTML = '';
         search.value = '';
-        //let html: any = `<span class='mr-1 mb-1 user-par px-1'><button class='btn mx-1 remove-user-button' type='button'>x</button>${(<HTMLElement>e.currentTarget).textContent}</span>`;
         let values = (<HTMLElement>e.currentTarget).textContent;
         if (!(selectedUsers.includes(values))) {
-            selectedUsers.push(values);
+            if (values === sessionStorage.getItem('username')) {
+                (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with yourself";
+            } else if(values === editTodoForm.getAttribute('original-user')) {
+                (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with the owner";
+            }
+            else {
+                (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "";
+                selectedUsers.push(values);
+            }
+
         }
-        if (values === sessionStorage.getItem('username')) {
-            (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You can\'t share the todo with yourself";
-        }
-        //chosenUsers.innerHTML = selectedUsers.join('');
         displayUsers();
-        // let removeUserButton = Array.from(document.getElementsByClassName('remove-user-button'));
-        // for (let i = 0; i < removeUserButton.length; i++) {
-        //     removeUserButton[i].addEventListener('click', function (e: Event) {
-        //         removeSelectedUser(e, i)
-        //     });
-        // }
-        // removeUserButton.forEach(button => {
-        //     button.addEventListener('click', removeSelectedUser);
-        // });
     }
 
-
-
-    // function m() {
-    //     let q = document.querySelector("#chosen-usernames") as HTMLDivElement;
-    //     console.log(q);
-
-    //     for (let i = 0; i < q.children.length; i++) {
-    //         (function (index) {
-    //             (<HTMLElement>q.children[i]).onclick = function () {
-    //                 //alert(index);
-    //                 selectedUsers.splice(index, 1);
-    //                 console.log(selectedUsers[index]);
-
-    //                 chosenUsers.innerHTML = selectedUsers.join('');
-    //             }
-    //         })(i);
-    //     }
-    // }
 }
 function displayUsers() {
     while (chosenUsers.firstChild) {
         chosenUsers.removeChild(chosenUsers.firstChild as ChildNode);
     }
-    for (let i = 0; i < selectedUsers.length; i++) {
-        let span = document.createElement('span');
-        let p = document.createElement('span');
-        span.setAttribute('class', 'mr-1 mb-1 user-par px-1');
-        p.textContent = selectedUsers[i];
-        let button = document.createElement('button');
-        button.setAttribute('class', 'btn mx-1 remove-user-button');
-        button.textContent = 'x';
-        button.setAttribute('type', 'button');
-        button.addEventListener('click', removeSelectedUser)
-        span.appendChild(button);
-        span.appendChild(p);
-        chosenUsers.appendChild(span);
-    };
+    if (selectedUsers) {
+        for (let i = 0; i < selectedUsers.length; i++) {
+            let span = document.createElement('span');
+            let p = document.createElement('span');
+            span.setAttribute('class', 'mr-1 mb-1 user-par px-1');
+            p.textContent = selectedUsers[i];
+            let button = document.createElement('button');
+            button.setAttribute('class', 'btn mx-1 remove-user-button');
+            button.textContent = 'x';
+            button.setAttribute('type', 'button');
+            button.addEventListener('click', removeSelectedUser)
+            span.appendChild(button);
+            span.appendChild(p);
+            chosenUsers.appendChild(span);
+        };
+    }
 
 }
 
@@ -272,17 +251,16 @@ function printEveryTodo() {
     function printToDos() {
         db.printTodos()
             .then((allTodos: any) => {
-                allTodos.sort(compare);
-                let newArr = groupBy(allTodos, 'category_name')
-                addTodosToForm(newArr, notesList, false);
+                sortTodoByCompletion(allTodos)
+
             });
 
-        db.printCompletedTodos()
-            .then((completedTodos: any) => {
-                completedTodos.sort(compare);
-                let newArr = groupBy(completedTodos, 'category_name');
-                addTodosToForm(newArr, completedNotesList, true);
-            })
+        // db.printCompletedTodos()
+        //     .then((completedTodos: any) => {
+        //         completedTodos.sort(compare);
+        //         let newArr = groupBy(completedTodos, 'category_name');
+        //         //addTodosToForm(newArr, completedNotesList, true);
+        //     })
 
         /* //////////////////////////Display the categories in the modal ////////////////////////////// */
         db.printCategories()
@@ -367,22 +345,28 @@ function printEveryTodo() {
         }
         db.printTodosByCategory(date, checkedCategory)
             .then((todosByCategory: any) => {
-                let completedTodos: any[] = [];
-                let uncompletedTodos: any[] = [];
-                todosByCategory.forEach((todo: any) => {
-                    if (todo.completed) {
-                        completedTodos.push(todo);
-                    } else {
-                        uncompletedTodos.push(todo);
-                    }
-                });
-                uncompletedTodos.sort(compare);
-                let newArr = groupBy(uncompletedTodos, 'category_name');
-                completedTodos.sort(compare);
-                let newArr2 = groupBy(completedTodos, 'category_name');
-                addTodosToForm(newArr, notesList, false);
-                addTodosToForm(newArr2, completedNotesList, true);
+                sortTodoByCompletion(todosByCategory);
             })
+
+    }
+
+    function sortTodoByCompletion(todos: any) {
+        let completedTodos: any[] = [];
+        let uncompletedTodos: any[] = [];
+        todos.forEach((todo: any) => {
+            if (todo.completed) {
+                completedTodos.push(todo);
+            } else {
+                uncompletedTodos.push(todo);
+            }
+        });
+        uncompletedTodos.sort(compare);
+        let newArr = groupBy(uncompletedTodos, 'category_name');
+        completedTodos.sort(compare);
+        let newArr2 = groupBy(completedTodos, 'category_name');
+        addTodosToForm(newArr, notesList, false);
+        addTodosToForm(newArr2, completedNotesList, true);
+        getSharedTodos();
     }
     /* //////////////////////////Call this function when a todo is marked as completed ////////////////////////////// */
     function markCompletedNote(e: Event) {
@@ -391,7 +375,7 @@ function printEveryTodo() {
         db.markCompletedNote(todoId, checked)
             .then(() => {
                 specificTodos();
-                //printToDos()
+
             });
     }
     /* //////////////////////////Remove a category////////////////////////////// */
@@ -576,13 +560,102 @@ function printEveryTodo() {
         }
     }
 
+    /* //////////////////////// GET SHARED TODOS ////////////////////// */
+    function getSharedTodos() {
+        db.getSharedTodos()
+            .then((todos: any) => {
+                console.log(todos);
+                let completedTodos: any[] = [];
+                let uncompletedTodos: any[] = [];
+                todos.forEach((todo: any) => {
+                    if (todo.completed) {
+                        completedTodos.push(todo);
+                    } else {
+                        uncompletedTodos.push(todo);
+                    }
+                });
+
+                printSharedTodos(uncompletedTodos, notesList, false);
+                printSharedTodos(completedTodos, completedNotesList, true);
+            })
+    }
+
+    function printSharedTodos(todos: any, location: any, isChecked: boolean) {
+        let ul = document.createElement('ul');
+        if (todos.length > 0) ul.textContent = "Shared todos";
+        todos.forEach((todos: any) => {
+            let listItem = document.createElement("li");
+            let checkBox = document.createElement("input");
+            let par = document.createElement("p");
+            let date = document.createElement('span');
+            let div = document.createElement('div');
+            let div2 = document.createElement('div');
+            let div3 = document.createElement('div');
+            let div4 = document.createElement('div');
+            let label = document.createElement('label');
+            let span = document.createElement('span');
+            let description = document.createElement('p');
+            let button = document.createElement("button");
+            //btn.textContent = "x";
+            checkBox.setAttribute("type", "checkbox");
+            checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+            checkBox.onclick = markCompletedNote;
+            span.setAttribute('class', 'checkmark');
+            if (isChecked) {
+                checkBox.checked = true;
+            }
+            label.appendChild(checkBox);
+            label.appendChild(span);
+            label.setAttribute("class", "check-label");
+            date.textContent = "Due date: " + rearrangeDate(modifyDate(todos.due_date));
+            date.setAttribute('class', 'my-auto');
+            button.setAttribute('class', "btn btn-warning todo-edit-button ml-2 text-center");
+            button.setAttribute('data-toggle', 'modal');
+            button.setAttribute('data-target', '#todoModal');
+            button.textContent = "Edit";
+            button.addEventListener('click', getTodoDetails);
+
+            div.appendChild(date);
+            div.appendChild(button);
+            //div.appendChild(label);
+            div.setAttribute("class", "d-flex justify-content-between");
+
+            par.textContent = todos.todo;
+            par.setAttribute('class', 'my-auto')
+
+            div2.appendChild(label);
+            div2.appendChild(par);
+            div2.setAttribute("class", " d-flex justify-content-between");
+            div3.setAttribute("class", " d-flex justify-content-between mt-1");
+            div3.style.width = '100%'
+            div3.appendChild(div2);
+            //listItem.appendChild(par);
+            div3.appendChild(div);
+            description.textContent = todos.description;
+            description.style.padding = '0 18px';
+            description.style.borderTop = '0.5px solid black';
+
+            div4.appendChild(description);
+            div4.setAttribute('class', 'content mt-2');
+
+            listItem.appendChild(div3);
+            listItem.appendChild(div4);
+            listItem.addEventListener('click', expand);
+            listItem.setAttribute("class", " d-flex flex-column printed-note");
+            listItem.setAttribute('data-note-id', todos._id.toString());
+            ul.appendChild(listItem);
+        });
+        location.appendChild(ul);
+    }
     /* //////////////////////// GET TODO DETAILS AND PRINT THEM IN THE MODAL ////////////////////// */
 
     function getTodoDetails(e: Event) {
+        selectedUsers = [];
         let noteId = (<String>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.currentTarget).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
         db.getTodoInfo(noteId)
             .then((result: any) => {
                 editTodoForm.setAttribute('data-note-id', result._id.toString());
+                editTodoForm.setAttribute('original-user', result.username);
                 editTitle.value = result.todo;
                 if (result.description !== undefined) {
                     editDescription.value = result.description;
@@ -594,8 +667,12 @@ function printEveryTodo() {
                         editCategory.value = result.category_name;
                         editCategory.setAttribute('customAttribute', result.color)
                     })
-                console.log(result.share);
-                selectedUsers = result.share;
+
+                if (result.share !== undefined) {
+                    console.log(result.share);
+                    selectedUsers = result.share;
+                }
+
                 displayUsers();
 
             })

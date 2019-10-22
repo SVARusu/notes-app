@@ -78,7 +78,7 @@ class DB {
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
     addNewNote(newNote: string, newNoteDescription: string, category: string, color: any, newDate: any) {
         return new Promise((resolve, reject) => {
-            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
+            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), username: sessionStorage.getItem("username"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
             todos.insertOne(createTodo)
                 .then(result => {
                     console.log(`Successfully inserted item with _id: ${result.insertedId}`)
@@ -102,9 +102,19 @@ class DB {
                 .catch(err => console.error(`Failed to update the item: ${err}`))
         });
     }
+    getSharedTodos() {
+        return new Promise((resolve, reject) => {
+            const query = { share: sessionStorage.getItem("username") };
+            todos.find(query).toArray()
+                .then(items => {
+                    resolve(items);
+                })
+                .catch(err => console.error(`Failed to find documents: ${err}`))
+        })
+    }
     printTodos() {
         return new Promise((resolve, reject) => {
-            const query = { owner_id: sessionStorage.getItem("loggedUser"), completed: false };
+            const query = { owner_id: sessionStorage.getItem("loggedUser") };
             todos.find(query).toArray()
                 .then(items => {
                     resolve(items);
@@ -126,12 +136,12 @@ class DB {
 
     printTodosByCategory = (date: any, checkedCategory: string[]) => {
         return new Promise((resolve, reject) => {
-            let query: any = {};
+            let query: any = { owner_id: sessionStorage.getItem("loggedUser") };
             if (date.length > 0) {
                 if (date.length === 2) {
-                    query = { owner_id: sessionStorage.getItem("loggedUser"), due_date: { $gt: date[0], $lt: date[1] } };
+                    query['due_date'] = { $gt: date[0], $lt: date[1] };
                 } else {
-                    query = { owner_id: sessionStorage.getItem("loggedUser"), due_date: { $in: date } };
+                    query['due_date'] = { $in: date };
                 }
             }
             if (checkedCategory.length > 0) {
