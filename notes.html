@@ -16,7 +16,6 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/fun-style.css">
     <link rel="stylesheet" type="text/css" href="./Lightpick-master/css/lightpick.css">
     <title>Document</title>
 </head>
@@ -92,19 +91,6 @@
                                     <textarea name="message" class="form-control" rows="5" cols="30" id="edit-description"
                                         placeholder="Todo description"></textarea>
                                 </div>
-                                <div class="rainbow">
-                                    <div class="form-group">
-                                        <label for="edit-description" class="font-weight-bold">Share the todo with another fabulous user</label>
-                                        <input type="text" autocomplete="off" class="form-control" id="search-user" placeholder="Username">
-                                    </div>
-                                    <div id="match-list">
-                                        <p id="duplicated-user"></p>
-                                    </div>
-                                    <div id="chosen-usernames" class="">
-
-                                    </div>
-                                </div>
-
                                 <div class="form-group ">
                                     <label for="edit-date" class="font-weight-bold">Due date</label>
                                     <!-- <input type="date" class="form-control" id="new-date"> -->
@@ -114,18 +100,16 @@
                                     <label for="edit-category" class="font-weight-bold">Category</label>
                                     <!-- <p id="color-box"></p> -->
                                     <select class="form-control" id="edit-category">
-
+                                        
                                     </select>
                                 </div>
-
                             </form>
                         </div>
                     </article>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" type="submit" class="btn btn-primary" id="save-changes" data-dismiss="modal" form="edit-form">Save
-                        changes</button>
+                    <button type="button" type="submit" class="btn btn-primary" id="save-changes" data-dismiss="modal" form="edit-form">Save changes</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -257,14 +241,6 @@
         </div>
     </div>
 
-    <div class="onoffswitch">
-        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch">
-        <label class="onoffswitch-label" for="myonoffswitch">
-            <span class="onoffswitch-inner"></span>
-            <span class="onoffswitch-switch"></span>
-        </label>
-    </div>
-    <script src="js/fun.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
     <script src="./Lightpick-master/lightpick.js"></script>
     <script>

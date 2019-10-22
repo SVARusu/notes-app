@@ -21,7 +21,6 @@ let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElemen
 let todayCheckbox = document.querySelector("#today-checkbox") as HTMLInputElement;
 let weekCheckbox = document.querySelector("#week-checkbox") as HTMLInputElement;
 let datePickerCheckbox = document.querySelector("#date-picker-checkbox") as HTMLInputElement;
-
 let checkedCategory: string[] = [];
 /* ////////////////////////////////////// EDIT TODO VARIABLES/////////////////////////// */
 let editTitle = document.querySelector('#edit-title') as HTMLInputElement;
@@ -31,12 +30,6 @@ let editCategory = document.querySelector('#edit-category') as HTMLSelectElement
 let editTodoForm: Element = document.querySelector("#edit-form") as HTMLElement;
 let editTodoSubmitButton = document.querySelector("#save-changes") as HTMLButtonElement;
 
-/* ////////////////////////////////////// Search User variables/////////////////////////// */
-let search = document.querySelector("#search-user") as HTMLInputElement;
-let matchList = document.querySelector("#match-list") as HTMLDivElement;
-let chosenUsers = document.querySelector("#chosen-usernames") as HTMLDivElement;
-let allUsers: any = [];
-let selectedUsers: any = [];
 function expand(e: any) {
     let content = e.currentTarget.childNodes[1];
     if (e.currentTarget.childNodes[1].childNodes[0].textContent !== '') {
@@ -50,7 +43,6 @@ function expand(e: any) {
 
 
 }
-
 
 if (notesForm) {
     /* //////////////////////////Redirect the user to the login page if he didnt log in and someone got here////////////////////////////// */
@@ -89,7 +81,6 @@ function init() {
     });
     logOut.addEventListener('click', function () {
         sessionStorage.setItem("loggedUser", '');
-        sessionStorage.setItem("username", '');
         let location = window.location.href;
         location = location.replace("notes.html", "")
         window.location.href = location;
@@ -118,10 +109,10 @@ function init() {
         }
 
     });
-    editCategory.addEventListener('change', function () {
+    editCategory.addEventListener('change', function(){
         let some: any = editCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute')
         editCategory.setAttribute('customAttribute', some);
-
+        
     });
     newCategoryForm.addEventListener("submit", function (e: Event) {
         let printError: Element = document.querySelector("#category-error") as HTMLElement;
@@ -151,122 +142,10 @@ function init() {
                 printEveryTodo();
             })
 
-        db.shareTodo(editTodoForm.getAttribute('data-note-id'), selectedUsers)
-            .then(() => {
-
-            })
-
-
-    });
-    /* /////////////////////////////////// GET USERS AND FILTER THEM BY ENTERED VALUE /////////////////////////////// */
-    db.getAllUsers()
-        .then((users: any) => {
-            users.forEach((user: any) => {
-                allUsers.push(user.username);
-            });
-        })
-
-    search.addEventListener('input', () => {
-        //searchUser(search.value);
-        let matches = allUsers.filter((user: String) => {
-            let exp = new RegExp(`^${search.value}`, 'gi');
-            return user.match(exp);
-        });
-        if (search.value.length === 0) {
-            matches = [];
-            matchList.innerHTML = ''
-        }
-        outputMatches(matches);
     });
 
-    function outputMatches(matches: string[]) {
-        if (matches.length > 0) {
-            let html = matches.map((match: string) => {
-                return `<div class='card card-body over'>${match}</div>`;
-            }).join('');
-            matchList.innerHTML = html;
-            let userDiv = Array.from(document.getElementsByClassName('over'));
-            userDiv.forEach(div => {
-                div.addEventListener('click', selectClickedUser);
-            });
-        } else {
-            matchList.innerHTML = ''
-        }
-    }
-
-    function selectClickedUser(e: Event) {
-        matchList.innerHTML = '';
-        search.value = '';
-        //let html: any = `<span class='mr-1 mb-1 user-par px-1'><button class='btn mx-1 remove-user-button' type='button'>x</button>${(<HTMLElement>e.currentTarget).textContent}</span>`;
-        let values = (<HTMLElement>e.currentTarget).textContent;
-        if (!(selectedUsers.includes(values))) {
-            selectedUsers.push(values);
-        }
-        if (values === sessionStorage.getItem('username')) {
-            (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You can\'t share the todo with yourself";
-        }
-        //chosenUsers.innerHTML = selectedUsers.join('');
-        displayUsers();
-        // let removeUserButton = Array.from(document.getElementsByClassName('remove-user-button'));
-        // for (let i = 0; i < removeUserButton.length; i++) {
-        //     removeUserButton[i].addEventListener('click', function (e: Event) {
-        //         removeSelectedUser(e, i)
-        //     });
-        // }
-        // removeUserButton.forEach(button => {
-        //     button.addEventListener('click', removeSelectedUser);
-        // });
-    }
-
-
-
-    // function m() {
-    //     let q = document.querySelector("#chosen-usernames") as HTMLDivElement;
-    //     console.log(q);
-
-    //     for (let i = 0; i < q.children.length; i++) {
-    //         (function (index) {
-    //             (<HTMLElement>q.children[i]).onclick = function () {
-    //                 //alert(index);
-    //                 selectedUsers.splice(index, 1);
-    //                 console.log(selectedUsers[index]);
-
-    //                 chosenUsers.innerHTML = selectedUsers.join('');
-    //             }
-    //         })(i);
-    //     }
-    // }
-}
-function displayUsers() {
-    while (chosenUsers.firstChild) {
-        chosenUsers.removeChild(chosenUsers.firstChild as ChildNode);
-    }
-    for (let i = 0; i < selectedUsers.length; i++) {
-        let span = document.createElement('span');
-        let p = document.createElement('span');
-        span.setAttribute('class', 'mr-1 mb-1 user-par px-1');
-        p.textContent = selectedUsers[i];
-        let button = document.createElement('button');
-        button.setAttribute('class', 'btn mx-1 remove-user-button');
-        button.textContent = 'x';
-        button.setAttribute('type', 'button');
-        button.addEventListener('click', removeSelectedUser)
-        span.appendChild(button);
-        span.appendChild(p);
-        chosenUsers.appendChild(span);
-    };
-
 }
 
-function removeSelectedUser(e: Event) {
-    e.preventDefault();
-    let value: any = (<HTMLElement>(<HTMLElement>e.currentTarget).parentNode).childNodes[1].textContent;
-    let index = selectedUsers.indexOf(value);
-    if (index > -1) {
-        selectedUsers.splice(index, 1);
-        displayUsers();
-    }
-}
 function printEveryTodo() {
     /* //////////////////////////Print todos ////////////////////////////// */
     function printToDos() {
@@ -380,8 +259,8 @@ function printEveryTodo() {
                 let newArr = groupBy(uncompletedTodos, 'category_name');
                 completedTodos.sort(compare);
                 let newArr2 = groupBy(completedTodos, 'category_name');
-                addTodosToForm(newArr, notesList, false);
-                addTodosToForm(newArr2, completedNotesList, true);
+                addTodosToForm(newArr, notesList, false)
+                addTodosToForm(newArr2, completedNotesList, true)
             })
     }
     /* //////////////////////////Call this function when a todo is marked as completed ////////////////////////////// */
@@ -594,9 +473,7 @@ function printEveryTodo() {
                         editCategory.value = result.category_name;
                         editCategory.setAttribute('customAttribute', result.color)
                     })
-                console.log(result.share);
-                selectedUsers = result.share;
-                displayUsers();
+                console.log(result);
 
             })
     }
