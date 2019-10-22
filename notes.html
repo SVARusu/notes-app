@@ -24,6 +24,7 @@
 </head>
 
 <body class="notes-body">
+
 	<!-- CATEGORIES MODAL -->
 	<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
 		aria-hidden="true">
@@ -74,54 +75,68 @@
 		</div>
 	</div>
 	<!-- EDIT TODO MODAL -->
-	<div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-		aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLongTitle">Edit your todo</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<article class="card-body mx-auto mb-3">
-						<div class="mx-auto">
-							<form action="" id="edit-form">
-								<div class="form-group">
-									<label for="edit-title" class="font-weight-bold">Title</label>
-									<input type="text" class="form-control" id="edit-title" placeholder="Todo title">
-								</div>
-								<div class="form-group">
-									<label for="edit-description" class="font-weight-bold">Description</label>
-									<textarea name="message" class="form-control" rows="5" cols="30" id="edit-description"
-										placeholder="Todo description"></textarea>
-								</div>
-								<div class="form-group ">
-									<label for="edit-date" class="font-weight-bold">Due date</label>
-									<!-- <input type="date" class="form-control" id="new-date"> -->
-									<input type="text" class="form-control text-center" id="edit-date" placeholder="dd/mm/yyyy">
-								</div>
-								<div class="form-group ">
-									<label for="edit-category" class="font-weight-bold">Category</label>
-									<!-- <p id="color-box"></p> -->
-									<select class="form-control" id="edit-category">
+    <div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Edit your todo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <article class="card-body mx-auto mb-3">
+                        <div class="mx-auto">
+                            <form action="" id="edit-form">
+                                <div class="form-group">
+                                    <label for="edit-title" class="font-weight-bold">Title</label>
+                                    <input type="text" class="form-control" id="edit-title" placeholder="Todo title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-description" class="font-weight-bold">Description</label>
+                                    <textarea name="message" class="form-control" rows="5" cols="30" id="edit-description"
+                                        placeholder="Todo description"></textarea>
+                                </div>
+                                <div class="rainbow">
+                                    <div class="form-group">
+                                        <label for="edit-description" class="font-weight-bold">Share the todo with another fabulous user</label>
+                                        <input type="text" autocomplete="off" class="form-control" id="search-user" placeholder="Username">
+                                    </div>
+                                    <p id="duplicated-user"></p>
+                                    <div id="match-list">
+                                        
+                                    </div>
+                                    <div id="chosen-usernames" class="">
 
-									</select>
-								</div>
-							</form>
-						</div>
-					</article>
+                                    </div>
+                                </div>
 
-				</div>
-				<div class="modal-footer">
-					<button type="button" type="submit" class="btn btn-primary" id="save-changes" data-dismiss="modal"
-						form="edit-form">Save changes</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                                <div class="form-group ">
+                                    <label for="edit-date" class="font-weight-bold">Due date</label>
+                                    <!-- <input type="date" class="form-control" id="new-date"> -->
+                                    <input type="text" class="form-control text-center" id="edit-date" placeholder="dd/mm/yyyy">
+                                </div>
+                                <div class="form-group ">
+                                    <label for="edit-category" class="font-weight-bold">Category</label>
+                                    <!-- <p id="color-box"></p> -->
+                                    <select class="form-control" id="edit-category">
+
+                                    </select>
+                                </div>
+
+                            </form>
+                        </div>
+                    </article>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" type="submit" class="btn btn-primary" id="save-changes" data-dismiss="modal" form="edit-form">Save
+                        changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 	<div class="container mt-5">
 		<div class="row">
