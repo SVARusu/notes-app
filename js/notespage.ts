@@ -8,6 +8,8 @@ let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInput
 let newNoteDescription = document.querySelector("#new-note-description") as HTMLTextAreaElement
 let newDate: HTMLInputElement = document.querySelector('#new-date') as HTMLInputElement;
 let notesForm: HTMLFormElement = document.querySelector("#note-form") as HTMLFormElement;
+const addNoteSubmitButton = document.querySelector("#add-note") as HTMLButtonElement;
+
 let notesList: HTMLElement = document.querySelector("#note-list") as HTMLElement;
 let completedNotesList: HTMLElement = document.querySelector("#completed-note-list") as HTMLElement;
 let viewCompletedTodos: HTMLElement = document.querySelector("#view-completed-todos") as HTMLElement;
@@ -21,7 +23,6 @@ let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElemen
 let todayCheckbox = document.querySelector("#today-checkbox") as HTMLInputElement;
 let weekCheckbox = document.querySelector("#week-checkbox") as HTMLInputElement;
 let datePickerCheckbox = document.querySelector("#date-picker-checkbox") as HTMLInputElement;
-
 let checkedCategory: string[] = [];
 /* ////////////////////////////////////// EDIT TODO VARIABLES/////////////////////////// */
 let editTitle = document.querySelector('#edit-title') as HTMLInputElement;
@@ -31,12 +32,6 @@ let editCategory = document.querySelector('#edit-category') as HTMLSelectElement
 let editTodoForm: Element = document.querySelector("#edit-form") as HTMLElement;
 let editTodoSubmitButton = document.querySelector("#save-changes") as HTMLButtonElement;
 
-/* ////////////////////////////////////// Search User variables/////////////////////////// */
-let search = document.querySelector("#search-user") as HTMLInputElement;
-let matchList = document.querySelector("#match-list") as HTMLDivElement;
-let chosenUsers = document.querySelector("#chosen-usernames") as HTMLDivElement;
-let allUsers: any = [];
-let selectedUsers: any = [];
 function expand(e: any) {
     let content = e.currentTarget.childNodes[1];
     if (e.currentTarget.childNodes[1].childNodes[0].textContent !== '') {
@@ -50,7 +45,6 @@ function expand(e: any) {
 
 
 }
-
 
 if (notesForm) {
     /* //////////////////////////Redirect the user to the login page if he didnt log in and someone got here////////////////////////////// */
@@ -89,13 +83,12 @@ function init() {
     });
     logOut.addEventListener('click', function () {
         sessionStorage.setItem("loggedUser", '');
-        sessionStorage.setItem("username", '');
         let location = window.location.href;
         location = location.replace("notes.html", "")
         window.location.href = location;
     })
     printEveryTodo();
-    notesForm.addEventListener("submit", (e: Event) => {
+    addNoteSubmitButton.addEventListener("click", (e: Event) => {
         let color = selectedCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute');
         let categoryValue = Number(selectedCategory.value);
         let category = selectedCategory.value;
@@ -118,10 +111,10 @@ function init() {
         }
 
     });
-    editCategory.addEventListener('change', function () {
+    editCategory.addEventListener('change', function(){
         let some: any = editCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute')
         editCategory.setAttribute('customAttribute', some);
-
+        
     });
     newCategoryForm.addEventListener("submit", function (e: Event) {
         let printError: Element = document.querySelector("#category-error") as HTMLElement;
@@ -151,13 +144,8 @@ function init() {
                 printEveryTodo();
             })
 
-        db.shareTodo(editTodoForm.getAttribute('data-note-id'), selectedUsers)
-            .then(() => {
-
-            })
-
-
     });
+
     /* /////////////////////////////////// GET USERS AND FILTER THEM BY ENTERED VALUE /////////////////////////////// */
     db.getAllUsers()
         .then((users: any) => {
@@ -235,17 +223,9 @@ function displayUsers() {
         };
     }
 
+
 }
 
-function removeSelectedUser(e: Event) {
-    e.preventDefault();
-    let value: any = (<HTMLElement>(<HTMLElement>e.currentTarget).parentNode).childNodes[1].textContent;
-    let index = selectedUsers.indexOf(value);
-    if (index > -1) {
-        selectedUsers.splice(index, 1);
-        displayUsers();
-    }
-}
 function printEveryTodo() {
     /* //////////////////////////Print todos ////////////////////////////// */
     function printToDos() {
@@ -345,7 +325,9 @@ function printEveryTodo() {
         }
         db.printTodosByCategory(date, checkedCategory)
             .then((todosByCategory: any) => {
+
                 sortTodoByCompletion(todosByCategory);
+
             })
 
     }
@@ -667,14 +649,11 @@ function printEveryTodo() {
                         editCategory.value = result.category_name;
                         editCategory.setAttribute('customAttribute', result.color)
                     })
-
                 if (result.share !== undefined) {
                     console.log(result.share);
                     selectedUsers = result.share;
                 }
-
                 displayUsers();
-
             })
     }
     /* //////////////////////////Functions used to alter the date depending on the need////////////////////////////// */
