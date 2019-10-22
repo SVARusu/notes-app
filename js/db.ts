@@ -20,7 +20,6 @@ class DB {
         const query = { "username": { "$eq": username } };
         const options = { "limit": 1 };
         const user = await users.find(query, options).first();
-
         if (typeof user === 'undefined') {
             return false;
         }
@@ -41,13 +40,13 @@ class DB {
             if (user.password === password) {
                 sessionStorage.setItem('loggedUser', user._id.toString());
                 sessionStorage.setItem('username', user.username);
-                return true;
+                return 0;
             } else {
-                return false;
+                return 2;
             }
         } else {
             console.log(`user ${username} does not exist in database`);
-            return false;
+            return 1;
         }
     }
 
@@ -61,7 +60,7 @@ class DB {
                 .then(result => {
                     let user: any = result
                     if (result) {
-                        resolve();
+                        resolve(4); // user already exists
                     } else {
                         console.log("No document matches the provided query.")
                         users.insertOne(newUser)

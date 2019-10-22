@@ -21,6 +21,7 @@ let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElemen
 let todayCheckbox = document.querySelector("#today-checkbox") as HTMLInputElement;
 let weekCheckbox = document.querySelector("#week-checkbox") as HTMLInputElement;
 let datePickerCheckbox = document.querySelector("#date-picker-checkbox") as HTMLInputElement;
+const addNoteSubmitButton = document.querySelector("#add-note") as HTMLButtonElement;
 
 let checkedCategory: string[] = [];
 /* ////////////////////////////////////// EDIT TODO VARIABLES/////////////////////////// */
@@ -95,7 +96,7 @@ function init() {
         window.location.href = location;
     })
     printEveryTodo();
-    notesForm.addEventListener("submit", (e: Event) => {
+    addNoteSubmitButton.addEventListener("click", (e: Event) => {
         let color = selectedCategory.options[selectedCategory.selectedIndex].getAttribute('customAttribute');
         let categoryValue = Number(selectedCategory.value);
         let category = selectedCategory.value;
