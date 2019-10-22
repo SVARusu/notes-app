@@ -5,6 +5,17 @@ class DB {
 
     /* ////////////////////////////// USER OPERATIONS ///////////////////////////////// */
 
+    getAllUsers = () => {
+        return new Promise((resolve, reject) => {
+            users.find().toArray()
+                .then(items => {
+                    console.log(`Successfully found ${items.length} documents.`)
+                    resolve(items);
+                })
+                .catch(err => console.error(`Failed to find documents: ${err}`))
+        })
+    }
+
     userExists = async (username: string) => {
         const query = { "username": { "$eq": username } };
         const options = { "limit": 1 };
@@ -29,6 +40,7 @@ class DB {
             const user: any = await this.getUser(username);
             if (user.password === password) {
                 sessionStorage.setItem('loggedUser', user._id.toString());
+                sessionStorage.setItem('username', user.username);
                 return true;
             } else {
                 return false;
@@ -73,6 +85,21 @@ class DB {
                     resolve();
                 })
                 .catch(err => console.error(`Failed to insert item: ${err}`))
+        });
+    }
+    shareTodo(todoId: any, selectedUsers: string[]) {
+        const query = { owner_id: sessionStorage.getItem("loggedUser"), _id: new BSON.ObjectId(todoId) };
+        return new Promise((resolve, rejects) => {
+            const update = { "$set": { share: selectedUsers } };
+            todos.updateOne(query, update)
+                .then(result => {
+                    const { matchedCount, modifiedCount } = result;
+                    if (matchedCount && modifiedCount) {
+                        console.log(`Successfully updated the item.`);
+                        resolve();
+                    }
+                })
+                .catch(err => console.error(`Failed to update the item: ${err}`))
         });
     }
     printTodos() {
