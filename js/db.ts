@@ -86,9 +86,9 @@ class DB {
                 .catch(err => console.error(`Failed to insert item: ${err}`))
         });
     }
-    addTaskToTodo(todoId: any, tasks: any){
+    addTaskToTodo(todoId: any, tasks: any) {
         console.log(tasks);
-        
+
         return new Promise((resolve, reject) => {
             const query = { _id: new BSON.ObjectId(todoId) };
             const update = { "$push": { tasks: tasks } };
@@ -101,6 +101,20 @@ class DB {
                     }
                 })
                 .catch(err => console.error(`Failed to update the item: ${err}`))
+        })
+    }
+    displayTasksInEditForm(todoId: any) {
+        return new Promise((resolve, reject) => {
+            const query = { _id: new BSON.ObjectId(todoId) }
+            todos.findOne(query)
+                .then(result => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        console.log("No document matches the provided query.")
+                    }
+                })
+                .catch(err => console.error(`Failed to find document: ${err}`))
         })
     }
     shareTodo(todoId: any, selectedUsers: string[]) {
@@ -207,15 +221,63 @@ class DB {
     markCompletedNote = (todoId: any, checked: boolean) => {
         const filterDoc = { _id: new BSON.ObjectId(todoId) };
         return new Promise((resolve, reject) => {
-            const update = { "$set": { completed: checked } };
-            todos.updateOne(filterDoc, update)
-                .then(result => {
-                    const { matchedCount, modifiedCount } = result;
-                    if (matchedCount && modifiedCount) {
-                        console.log(`Successfully updated the item.`);
-                        resolve();
+            todos.findOne(filterDoc)
+                .then((result: any) => {
+                    let tasksCompleted: boolean = true;
+                    if (result) {
+                        result.tasks.forEach((task: any) => {
+                            if (task.completed === false) {
+                                tasksCompleted = false;
+                                resolve(false);
+                            }
+                            if (tasksCompleted) {
+                                const update = { "$set": { completed: checked } };
+                                todos.updateOne(filterDoc, update)
+                                    .then(result => {
+                                        const { matchedCount, modifiedCount } = result;
+                                        if (matchedCount && modifiedCount) {
+                                            console.log(`Successfully updated the item.`);
+                                            resolve(true);
+                                        }
+                                    })
+                                    .catch(err => console.error(`Failed to update the item: ${err}`))
+                            }
+                        });
+                    } else {
+                        console.log("No document matches the provided query.")
+
                     }
                 })
+                .catch(err => console.error(`Failed to find document: ${err}`))
+        });
+    }
+
+    markCompletedTask(todoId: any, taskId: any, checked: boolean) {
+        return new Promise((resolve, reject) => {
+            todos.updateOne(
+                {
+                    _id: new BSON.ObjectId(todoId),
+                    tasks: { $elemMatch: { id: new BSON.ObjectId(taskId) } }
+                },
+                { $set: { "tasks.$.completed": checked } }
+            ).then(() => {
+                if (!checked) {
+                    const filterDoc = { _id: new BSON.ObjectId(todoId) };
+                    const update = { "$set": { completed: checked } };
+                    todos.updateOne(filterDoc, update)
+                        .then(result => {
+                            const { matchedCount, modifiedCount } = result;
+                            if (matchedCount && modifiedCount) {
+                                console.log(`Successfully updated the item.`);
+                                resolve(false);
+                            }
+                            resolve(true);
+                        })
+                        .catch(err => console.error(`Failed to update the item: ${err}`))
+                }
+                console.log(`Successfully updated the item.`);
+                
+            })
                 .catch(err => console.error(`Failed to update the item: ${err}`))
         });
     }
