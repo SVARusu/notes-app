@@ -1,5 +1,5 @@
 import { DB } from './db';
-import {generateCommentField } from './components/notecomments';
+import { generateCommentField } from './components/notecomments';
 
 const db = new DB();
 
@@ -448,6 +448,22 @@ function printEveryTodo() {
 
         // add comment field to 'todo' item
         listItem.appendChild(commentField);
+        const addCommentButton = commentField.children[2].children[1].lastChild as HTMLButtonElement;
+        const commentInput = commentField.children[1].firstChild as HTMLInputElement;
+
+        addCommentButton.addEventListener('click', () => {
+          if (commentInput.value === '') {
+            addCommentButton.disabled = true;
+          } else {
+            db.addComment(
+              todos[key][i]._id.toString(),
+              sessionStorage.getItem("loggedUser") as string,
+              commentInput.value
+            )
+            commentInput.value = '';
+            addCommentButton.disabled = true;
+          }
+        })
 
         ul.appendChild(listItem);
       }

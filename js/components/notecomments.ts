@@ -72,14 +72,6 @@ async function generateCommentField(comments: Icomment[]) {
     textInput.style.display = 'block';
     cancelButton.style.display = 'block';
 
-    if (textInput.value === '') {
-      addButton.disabled = true;
-    } else {
-      // add comment to db
-      console.log(textInput.value);
-      textInput.value = '';
-      addButton.disabled = true;
-    }
   });
 
   // container elements

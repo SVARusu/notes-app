@@ -1,5 +1,5 @@
 import { categories, todos, users } from './stitch/mongodb';
-import { IgeneralError } from './utils';
+import { Icomment, IgeneralError } from './utils';
 const BSON = require('bson');
 
 class DB {
@@ -77,7 +77,16 @@ class DB {
   /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
   addNewNote(newNote: string, newNoteDescription: string, category: string, color: any, newDate: any) {
     return new Promise((resolve, reject) => {
-      let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
+      let createTodo = {
+        owner_id: sessionStorage.getItem("loggedUser"),
+        category_name: category,
+        completed: false,
+        todo: newNote,
+        description: newNoteDescription,
+        due_date: newDate,
+        color: color,
+        comments: []
+      };
       todos.insertOne(createTodo)
         .then(result => {
           console.log(`Successfully inserted item with _id: ${result.insertedId}`)
@@ -275,9 +284,10 @@ class DB {
     });
   }
 
-  getUsername = async (id: string) => {
-    const query = { "_id": { "$eq": new BSON.ObjectId(id) } };
+  getUsername = async (userId: string) => {
+    const query = { "_id": { "$eq": new BSON.ObjectId(userId) } };
     const resp: any = await users.findOne(query);
+
     if (resp !== null) {
       return resp.username;
     } else {
@@ -288,10 +298,33 @@ class DB {
   getUserId = async (username: string) => {
     const query = { "username": { "$eq": username } };
     const resp: any = await users.findOne(query);
+
     if (resp !== null) {
       return resp._id;
     } else {
       return 'unknown';
+    }
+  }
+
+  addComment = async (noteId: string, userId: string, message: string) => {
+    const newComment: Icomment = {
+      owner_id: userId,
+      message: message
+    }
+
+    const query = { "_id": { "$eq": new BSON.ObjectId(noteId) } };
+    const update = { "$push": { "comments": newComment } };
+    const options = { "upsert": false };
+
+    try {
+      const resp: any = await todos.updateOne(query, update, options);
+      const { matchedCount, modifiedCount } = resp;
+
+      if (matchedCount && modifiedCount) {
+        console.log('Successfully added a new comment.');
+      }
+    } catch (err) {
+      console.log(`Failed to add comment: ${err}`);
     }
   }
 }
