@@ -86,6 +86,23 @@ class DB {
                 .catch(err => console.error(`Failed to insert item: ${err}`))
         });
     }
+    addTaskToTodo(todoId: any, tasks: any){
+        console.log(tasks);
+        
+        return new Promise((resolve, reject) => {
+            const query = { _id: new BSON.ObjectId(todoId) };
+            const update = { "$push": { tasks: tasks } };
+            todos.updateOne(query, update)
+                .then(result => {
+                    const { matchedCount, modifiedCount } = result;
+                    if (matchedCount && modifiedCount) {
+                        console.log(`Successfully updated the item.`);
+                        resolve();
+                    }
+                })
+                .catch(err => console.error(`Failed to update the item: ${err}`))
+        })
+    }
     shareTodo(todoId: any, selectedUsers: string[]) {
         const query = { owner_id: sessionStorage.getItem("loggedUser"), _id: new BSON.ObjectId(todoId) };
         return new Promise((resolve, rejects) => {

@@ -38,6 +38,11 @@ let matchList = document.querySelector("#match-list") as HTMLDivElement;
 let chosenUsers = document.querySelector("#chosen-usernames") as HTMLDivElement;
 let allUsers: any = [];
 let selectedUsers: any = [];
+/* //////////////////////////////////////Todo tasks/////////////////////////// */
+let newTask = document.querySelector("#new-task") as HTMLInputElement;
+let addTask = document.querySelector("#add-task") as HTMLButtonElement;
+let displayTask = document.querySelector("#display-task") as HTMLDivElement;
+let allTasks: string[] = []
 function expand(e: any) {
     let content = e.currentTarget.childNodes[1];
     if (e.currentTarget.childNodes[1].childNodes[0].textContent !== '') {
@@ -202,7 +207,7 @@ function init() {
         if (!(selectedUsers.includes(values))) {
             if (values === sessionStorage.getItem('username')) {
                 (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with yourself";
-            } else if(values === editTodoForm.getAttribute('original-user')) {
+            } else if (values === editTodoForm.getAttribute('original-user')) {
                 (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with the owner";
             }
             else {
@@ -212,6 +217,34 @@ function init() {
 
         }
         displayUsers();
+    }
+    /* /////////////////////////////////// TODO TASKS /////////////////////////////// */
+    addTask.addEventListener('click', function (e: Event) {
+        e.preventDefault();
+        if (newTask.value !== '') {
+            let task: any = {
+                task_name: newTask.value,
+                completed: false
+            }
+            newTask.value = '';
+            allTasks.push(task);
+            db.addTaskToTodo(editTodoForm.getAttribute('data-note-id'), task)
+                .then(() => {
+                    allTasks = [];
+                })
+        }
+        
+    });
+
+    function displayTasks() {
+        if (allTasks.length > 0) {
+            allTasks.forEach((task: any) => {
+                while (displayTask.firstChild) {
+                    displayTask.removeChild(displayTask.firstChild as ChildNode);
+                }
+
+            });
+        }
     }
 
 }
@@ -255,14 +288,6 @@ function printEveryTodo() {
                 sortTodoByCompletion(allTodos)
 
             });
-
-        // db.printCompletedTodos()
-        //     .then((completedTodos: any) => {
-        //         completedTodos.sort(compare);
-        //         let newArr = groupBy(completedTodos, 'category_name');
-        //         //addTodosToForm(newArr, completedNotesList, true);
-        //     })
-
         /* //////////////////////////Display the categories in the modal ////////////////////////////// */
         db.printCategories()
             .then((allCategories: any) => {
