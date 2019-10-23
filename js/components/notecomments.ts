@@ -29,38 +29,57 @@ async function generateCommentField(comments: Icomment[]) {
   const textField = createTextInput();
   const controllersField = createFieldControllers(comments);
 
-  const textInput = textField.firstChild as HTMLElement;
+  const textInput = textField.firstChild as HTMLInputElement;
   const numOfComments = controllersField.children[0] as HTMLElement;
   const cancelButton = controllersField.children[1].firstChild as HTMLElement;
-  const addButton = controllersField.children[1].lastChild as HTMLElement;
+  const addButton = controllersField.children[1].lastChild as HTMLButtonElement;
 
   // event listeners for elements interaction
-  textInput.addEventListener('click', (e) => {
+  textInput.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
   })
 
-  numOfComments.addEventListener('click', (e) => {
+  textInput.addEventListener('input', (e: Event) => {
+    if (textInput.value !== '') {
+      addButton.disabled = false;
+    } else {
+      addButton.disabled = true;
+    }
+  })
+
+  numOfComments.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
     commentsList.style.display === 'none'
       ? commentsList.style.display = 'block'
       : commentsList.style.display = 'none'
   })
 
-  cancelButton.addEventListener('click', (e) => {
+  cancelButton.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
     textInput.style.display = 'none';
+    textInput.value = '';
     cancelButton.style.display = 'none';
+    addButton.disabled = false;
   });
 
-  document.addEventListener('keyup', (e) => {
+  document.addEventListener('keyup', (e: KeyboardEvent) => {
     e.stopPropagation();
     if (e.keyCode === 27) cancelButton.click();
   });
 
-  addButton.addEventListener('click', (e) => {
+  addButton.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
     textInput.style.display = 'block';
     cancelButton.style.display = 'block';
+
+    if (textInput.value === '') {
+      addButton.disabled = true;
+    } else {
+      // add comment to db
+      console.log(textInput.value);
+      textInput.value = '';
+      addButton.disabled = true;
+    }
   });
 
   // container elements
@@ -73,6 +92,8 @@ async function generateCommentField(comments: Icomment[]) {
 
 async function createCommentsList(comments: Icomment[]) {
   const list = document.createElement('ul');
+  list.style.display = 'none';
+  list.style.listStyle = 'none';
 
   for (let comment of comments) {
     const newComment = document.createElement('li');
@@ -91,9 +112,6 @@ async function createCommentsList(comments: Icomment[]) {
 
     list.appendChild(newComment);
   }
-
-  list.style.display = 'none';
-  list.style.listStyle = 'none';
 
   return list;
 }

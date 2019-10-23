@@ -1,45 +1,52 @@
 import { categories, todos, users } from './stitch/mongodb';
+import { IgeneralError } from './utils';
 const BSON = require('bson');
 
 class DB {
 
   /* ////////////////////////////// USER OPERATIONS ///////////////////////////////// */
 
-  userExists = async (username: string, password: string) => {
+  userExists = async (username: string) => {
+    const query = {
+      "username": { "$eq": username },
+    };
+    return (await users.count(query) === 1)
+  }
+
+  validateLogin = async (username: string, password: string) => {
     const query = {
       "username": { "$eq": username },
       "password": { "$eq": password }
     };
     const options = { "limit": 1 };
-    const user = await users.find(query, options).first();
-
-    if (typeof user === 'undefined') {
-      return false;
-    }
-    return true;
-  }
-
-  getUser = async (username: string) => {
-    const query = { "username": { "$eq": username } };
-    const options = { "limit": 1 };
-    return await users.find(query, options).first();
+    return !!(await users.find(query, options).first());
   }
 
   loginUser = async (username: string, password: string) => {
-    const exists: any = await this.userExists(username, password);
+    const exists: boolean = await this.userExists(username);
 
     if (exists) {
-      const user: any = await this.getUser(username);
-      if (user.password === password) {
-        sessionStorage.setItem('loggedUser', user._id.toString());
-        return 0; // good username and password
+      const valid: boolean = await this.validateLogin(username, password);
+
+      if (valid) {
+        const id: any = await this.getUserId(username);
+        sessionStorage.setItem('loggedUser', id.toString());
+        return ({
+          code: 0,
+          message: 'Valid username and password'
+        } as IgeneralError);
       } else {
-        console.log('password is invalid');
-        return 2; // wrong password for current user
+        return ({
+          code: 2,
+          message: 'Invalid password'
+        } as IgeneralError);
       }
     } else {
       console.log(`user ${username} does not exist in database`);
-      return 1; // username does not exist in database
+      return ({
+        code: 1,
+        message: 'Username does not exist'
+      } as IgeneralError);
     }
   }
 
@@ -50,7 +57,10 @@ class DB {
       users.findOne(query)
         .then((result: any) => {
           if (result) {
-            resolve(4); // user already exists
+            resolve({
+              code: 3,
+              message: 'User already exists'
+            } as IgeneralError);
           } else {
             console.log("No document matches the provided query.")
             users.insertOne(newUser)
@@ -270,6 +280,16 @@ class DB {
     const resp: any = await users.findOne(query);
     if (resp !== null) {
       return resp.username;
+    } else {
+      return 'unknown';
+    }
+  }
+
+  getUserId = async (username: string) => {
+    const query = { "username": { "$eq": username } };
+    const resp: any = await users.findOne(query);
+    if (resp !== null) {
+      return resp._id;
     } else {
       return 'unknown';
     }

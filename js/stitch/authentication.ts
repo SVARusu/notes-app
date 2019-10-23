@@ -1,5 +1,6 @@
 import { AnonymousCredential } from "mongodb-stitch-browser-sdk";
 import { stitchApp } from "./stitchapp";
+import { IgeneralError } from "../utils";
 
 export function loginAnonymous() {
   // Allow users to log in anonymously
@@ -7,10 +8,10 @@ export function loginAnonymous() {
   return stitchApp.auth.loginWithCredential(credential)
     .catch((e) => {
       return ({
-        errorCode: e.errorCode as number,
-        message: e.message as string
-      })
-    })
+          code: e.errorCode,
+          message: e.message
+        } as IgeneralError);
+    });
 }
 
 export function hasLoggedInUser() {

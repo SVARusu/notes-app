@@ -4,6 +4,11 @@ interface Icomment {
   message: string
 }
 
+interface IgeneralError {
+  code: number,
+  message: string
+}
+
 interface IinputOptions {
   [option: string]: RegExp;
 };
@@ -22,5 +27,6 @@ const inputValidationRegex: IinputOptions = {
 
 export { 
   Icomment, 
+  IgeneralError,
   inputValidationRegex
 };

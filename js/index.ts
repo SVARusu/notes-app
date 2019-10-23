@@ -1,6 +1,7 @@
 import { DB } from './db';
 import './stitch/stitchIndex';
 import { loginAnonymous, hasLoggedInUser } from './stitch/stitchIndex';
+import { IgeneralError } from './utils';
 
 const db = new DB();
 let loginUsername: HTMLInputElement = document.querySelector("#login-username") as HTMLInputElement;
@@ -23,9 +24,9 @@ async function init() {
     loginForm.addEventListener('submit', (e: Event) => {
       e.preventDefault();
       db.loginUser(loginUsername.value, loginPassword.value)
-        .then((verdict) => {
-          generalErrorHandler(verdict);
-          if (verdict === 0) {
+        .then((response) => {
+          generalErrorHandler(response as IgeneralError);
+          if (response.code === 0) {
             let location = window.location.href;
             if (location.includes("index.html")) {
               location = location.replace("index.html", "notes.html");
@@ -36,6 +37,7 @@ async function init() {
           }
         })
         .catch((error) => {
+          console.log(error);
           generalError.textContent = "xxxxxxxxx";
           console.log("user does not exist");
         });
@@ -89,17 +91,11 @@ function passwordInputErrorHandler(input: string): string {
   return 'Input is valid';
 }
 
-function generalErrorHandler(input: number | string | any) {
-  if (input === 1) {
-    generalError.textContent = 'Username does not exist';
-    generalError.style.visibility = 'visible';
-  } else if (input === 2) {
-    generalError.textContent = 'Wrong password';
-    generalError.style.visibility = 'visible';
-  } else if (typeof input === 'object') {
-    generalError.textContent = `ErrorCode ${input.errorCode}, ${input.message}`;
-    generalError.style.visibility = 'visible';
-  } else if (input === 'clear') {
+function generalErrorHandler(input: IgeneralError | string) {
+  if (typeof input === 'string') {
     generalError.style.visibility = 'hidden';
+  } else {
+    generalError.textContent = `${input.message}`
+    generalError.style.visibility = 'visible';
   }
 }
