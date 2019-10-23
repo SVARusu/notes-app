@@ -1,5 +1,7 @@
 import { DB } from './db';
 import { categories } from './stitch/mongodb';
+const BSON = require('bson');
+
 
 
 const db = new DB();
@@ -221,33 +223,45 @@ function init() {
     /* /////////////////////////////////// TODO TASKS /////////////////////////////// */
     addTask.addEventListener('click', function (e: Event) {
         e.preventDefault();
+        let todoId = editTodoForm.getAttribute('data-note-id');
         if (newTask.value !== '') {
             let task: any = {
+                id: new BSON.ObjectId(),
                 task_name: newTask.value,
                 completed: false
             }
             newTask.value = '';
             allTasks.push(task);
-            db.addTaskToTodo(editTodoForm.getAttribute('data-note-id'), task)
+            db.addTaskToTodo(todoId, task)
                 .then(() => {
-                    allTasks = [];
+                    displayTasksInEditForm(todoId);
+                    printEveryTodo();
                 })
         }
-        
+
     });
 
-    function displayTasks() {
-        if (allTasks.length > 0) {
-            allTasks.forEach((task: any) => {
-                while (displayTask.firstChild) {
-                    displayTask.removeChild(displayTask.firstChild as ChildNode);
+}
+/* /////////////////////////////////// GET TASKS FOR A SPECIFIC TODO /////////////////////////////// */
+function displayTasksInEditForm(todoId: any) {
+    db.displayTasksInEditForm(todoId)
+        .then((result: any) => {
+            while (displayTask.firstChild) {
+                displayTask.removeChild(displayTask.firstChild as ChildNode);
+            }
+            if (result.tasks) {
+                console.log(result);
+                
+                for (let i = 0; i < result.tasks.length; i++) {
+                    let p = document.createElement('p');
+                    p.textContent = `${i + 1}. ${result.tasks[i].task_name}`;
+                    displayTask.appendChild(p);
                 }
-
-            });
-        }
-    }
+            }
+        })
 
 }
+/* /////////////////////////////////// GET USERS THAT THE TODO IS SHARED WITH  /////////////////////////////// */
 function displayUsers() {
     while (chosenUsers.firstChild) {
         chosenUsers.removeChild(chosenUsers.firstChild as ChildNode);
@@ -270,7 +284,7 @@ function displayUsers() {
     }
 
 }
-
+/* /////////////////////////////////// REMOVE USERS FROM THE SHARED LIST  /////////////////////////////// */
 function removeSelectedUser(e: Event) {
     e.preventDefault();
     let value: any = (<HTMLElement>(<HTMLElement>e.currentTarget).parentNode).childNodes[1].textContent;
@@ -280,6 +294,7 @@ function removeSelectedUser(e: Event) {
         displayUsers();
     }
 }
+
 function printEveryTodo() {
     /* //////////////////////////Print todos ////////////////////////////// */
     function printToDos() {
@@ -399,10 +414,29 @@ function printEveryTodo() {
         let todoId: any = ((<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
         let checked = (<HTMLInputElement>e.target).checked;
         db.markCompletedNote(todoId, checked)
-            .then(() => {
-                specificTodos();
-
+            .then((completed) => {
+                if(completed){
+                    (<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).style.border = '';
+                    specificTodos();
+                } else {
+                    (<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).style.border = '0.5px solid red';
+                    (<HTMLInputElement>e.target).checked = false;
+                }
             });
+    }
+
+    function markCompletedTask(e: Event){
+        let todoId: any = ((<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
+        let taskId: any = (<HTMLElement>e.target).getAttribute('task-id');
+        let checked = (<HTMLInputElement>e.target).checked;
+        db.markCompletedTask(todoId, taskId, checked)
+            .then((completed) => {
+                console.log(completed);
+                
+                if(!completed){
+                    specificTodos();
+                }
+            })
     }
     /* //////////////////////////Remove a category////////////////////////////// */
     function deleteCategory(e: Event) {
@@ -563,9 +597,36 @@ function printEveryTodo() {
                 description.textContent = todos[key][i].description;
                 description.style.padding = '0 18px';
                 description.style.borderTop = '0.5px solid black';
+                description.style.borderBottom = '0.5px solid black';
 
                 div4.appendChild(description);
                 div4.setAttribute('class', 'content mt-2');
+
+                if (todos[key][i].tasks) {
+                    for (let j = 0; j < todos[key][i].tasks.length; j++) {
+                        let checkBox = document.createElement('input');
+                        let span = document.createElement('span');
+                        let par = document.createElement('span');
+                        let label = document.createElement('label');
+                        let div = document.createElement('div');
+                        checkBox.setAttribute("type", "checkbox");
+                        checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+                        checkBox.setAttribute('task-id', todos[key][i].tasks[j].id.toString());
+                        checkBox.addEventListener('click', markCompletedTask);
+                        if (todos[key][i].tasks[j].completed === true) {
+                            checkBox.checked = true;
+                        }
+                        span.setAttribute('class', 'checkmark');
+                        label.appendChild(checkBox);
+                        label.appendChild(span);
+                        label.setAttribute("class", "check-label");
+                        par.textContent = todos[key][i].tasks[j].task_name;
+                        div.appendChild(label);
+                        div.appendChild(par);
+                        div.setAttribute("class", " d-flex");
+                        div4.appendChild(div);
+                    }
+                }
 
                 listItem.appendChild(div3);
                 listItem.appendChild(div4);
@@ -590,7 +651,6 @@ function printEveryTodo() {
     function getSharedTodos() {
         db.getSharedTodos()
             .then((todos: any) => {
-                console.log(todos);
                 let completedTodos: any[] = [];
                 let uncompletedTodos: any[] = [];
                 todos.forEach((todo: any) => {
@@ -698,7 +758,7 @@ function printEveryTodo() {
                     console.log(result.share);
                     selectedUsers = result.share;
                 }
-
+                displayTasksInEditForm(noteId);
                 displayUsers();
 
             })
