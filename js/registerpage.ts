@@ -190,7 +190,9 @@ function generalErrorHandler(input: IgeneralError | string) {
   if (typeof input === 'string') {
     generalError.style.visibility = 'hidden';
   } else {
-    generalError.textContent = input.message;
-    generalError.style.visibility = 'visible';
+    if (input.code !== 0) {
+      generalError.textContent = input.message;
+      generalError.style.visibility = 'visible';
+    }
   }
 }

@@ -107,6 +107,24 @@ async function createCommentsList(comments: Icomment[]) {
   return list;
 }
 
+async function createCommentElement(message: string, ownerId: string) {
+  const newComment = document.createElement('li');
+  const commentOwner = document.createElement('span');
+  const commentMessage = document.createElement('span');
+  const username = await db.getUsername(ownerId);
+
+  commentOwner.textContent = username;
+  commentOwner.style.marginLeft = '10px';
+  commentOwner.style.marginRight = '10px';
+  commentMessage.textContent = message;
+
+  newComment.appendChild(commentOwner);
+  newComment.appendChild(commentMessage);
+  newComment.classList.add('d-flex');
+
+  return newComment as HTMLLIElement;
+}
+
 function createTextInput(): HTMLElement {
   const field = document.createElement('div');
   const textInput = document.createElement('input');
@@ -151,4 +169,4 @@ function createFieldControllers(comments: Icomment[]): HTMLElement {
   return field;
 }
 
-export { generateCommentField };
+export { generateCommentField, createCommentElement };

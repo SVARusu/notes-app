@@ -306,6 +306,11 @@ class DB {
     }
   }
 
+  getNote = async (noteId: string) => {
+    const query = { "_id": { "$eq": new BSON.ObjectId(noteId) } };
+    return await todos.findOne(query);
+  }
+
   addComment = async (noteId: string, userId: string, message: string) => {
     const newComment: Icomment = {
       owner_id: userId,
@@ -328,11 +333,11 @@ class DB {
     }
   }
 
-  fetchComments = async (noteId: string) => {
-    const query = { "_id": { "$eq": new BSON.ObjectId(noteId) } };
-    const resp: any = await todos.findOne(query);
-    return resp.comments;
+  countComments = async (noteId: string) => {
+    const note: any = await this.getNote(noteId);
+    return note.comments.length;
   }
 }
+
 
 export { DB };

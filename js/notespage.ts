@@ -1,5 +1,5 @@
 import { DB } from './db';
-import { generateCommentField } from './components/notecomments';
+import { generateCommentField, createCommentElement } from './components/notecomments';
 
 const db = new DB();
 
@@ -448,8 +448,10 @@ function printEveryTodo() {
 
         // add comment field to 'todo' item
         listItem.appendChild(commentField);
-        let addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
-        let commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
+        const addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
+        const commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
+        const commentList = listItem.children[2].children[0] as HTMLUListElement;
+        const numOfComments = listItem.children[2].children[2].children[0] as HTMLElement;
 
         addCommentButton.addEventListener('click', async function newCommentHandler() {
           if (commentInput.value === '') {
@@ -460,17 +462,17 @@ function printEveryTodo() {
               sessionStorage.getItem("loggedUser") as string,
               commentInput.value
             )
-            const newComments = await db.fetchComments(todos[key][i]._id.toString());
+            const newCommentElem = await createCommentElement(
+              commentInput.value,
+              sessionStorage.getItem("loggedUser") as string
+            );
+
             commentInput.value = '';
             addCommentButton.disabled = true;
 
-            // render new comments list
-            const newCommentField = await generateCommentField(newComments);
-            listItem.replaceChild(newCommentField, listItem.children[2])
-
-            addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
-            commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
-            addCommentButton.addEventListener('click', newCommentHandler);
+            const commentCount = await db.countComments(todos[key][i]._id.toString());
+            numOfComments.textContent = `${commentCount} comments`;
+            commentList.appendChild(newCommentElem);
           }
         })
 
