@@ -1,4 +1,8 @@
 import { DB } from './db';
+import { categories } from './stitch/mongodb';
+const BSON = require('bson');
+
+
 import { generateCommentField, createCommentElement } from './components/notecomments';
 
 const db = new DB();
@@ -7,8 +11,6 @@ let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInput
 let newNoteDescription = document.querySelector("#new-note-description") as HTMLTextAreaElement
 let newDate: HTMLInputElement = document.querySelector('#new-date') as HTMLInputElement;
 let notesForm: HTMLFormElement = document.querySelector("#note-form") as HTMLFormElement;
-const addNoteSubmitButton = document.querySelector("#add-note") as HTMLButtonElement;
-
 let notesList: HTMLElement = document.querySelector("#note-list") as HTMLElement;
 let completedNotesList: HTMLElement = document.querySelector("#completed-note-list") as HTMLElement;
 let viewCompletedTodos: HTMLElement = document.querySelector("#view-completed-todos") as HTMLElement;
@@ -22,6 +24,8 @@ let logOut: HTMLElement = document.querySelector("#logout-button") as HTMLElemen
 let todayCheckbox = document.querySelector("#today-checkbox") as HTMLInputElement;
 let weekCheckbox = document.querySelector("#week-checkbox") as HTMLInputElement;
 let datePickerCheckbox = document.querySelector("#date-picker-checkbox") as HTMLInputElement;
+const addNoteSubmitButton = document.querySelector("#add-note") as HTMLButtonElement;
+
 let checkedCategory: string[] = [];
 /* ////////////////////////////////////// EDIT TODO VARIABLES/////////////////////////// */
 let editTitle = document.querySelector('#edit-title') as HTMLInputElement;
@@ -31,6 +35,17 @@ let editCategory = document.querySelector('#edit-category') as HTMLSelectElement
 let editTodoForm: Element = document.querySelector("#edit-form") as HTMLElement;
 let editTodoSubmitButton = document.querySelector("#save-changes") as HTMLButtonElement;
 
+/* ////////////////////////////////////// Search User variables/////////////////////////// */
+let search = document.querySelector("#search-user") as HTMLInputElement;
+let matchList = document.querySelector("#match-list") as HTMLDivElement;
+let chosenUsers = document.querySelector("#chosen-usernames") as HTMLDivElement;
+let allUsers: any = [];
+let selectedUsers: any = [];
+/* //////////////////////////////////////Todo tasks/////////////////////////// */
+let newTask = document.querySelector("#new-task") as HTMLInputElement;
+let addTask = document.querySelector("#add-task") as HTMLButtonElement;
+let displayTask = document.querySelector("#display-task") as HTMLDivElement;
+let allTasks: string[] = []
 function expand(e: any) {
   let content = e.currentTarget.childNodes[1];
   if (e.currentTarget.childNodes[1].childNodes[0].textContent !== '') {
@@ -44,6 +59,7 @@ function expand(e: any) {
 
 
 }
+
 
 if (notesForm) {
   /* //////////////////////////Redirect the user to the login page if he didnt log in and someone got here////////////////////////////// */
@@ -82,6 +98,7 @@ function init() {
   });
   logOut.addEventListener('click', function () {
     sessionStorage.setItem("loggedUser", '');
+    sessionStorage.setItem("username", '');
     let location = window.location.href;
     location = location.replace("notes.html", "")
     window.location.href = location;
@@ -143,8 +160,140 @@ function init() {
         printEveryTodo();
       })
 
+    db.shareTodo(editTodoForm.getAttribute('data-note-id'), selectedUsers)
+      .then(() => {
+
+      })
+
+
+  });
+  /* /////////////////////////////////// GET USERS AND FILTER THEM BY ENTERED VALUE /////////////////////////////// */
+  db.getAllUsers()
+    .then((users: any) => {
+      users.forEach((user: any) => {
+        allUsers.push(user.username);
+      });
+    })
+
+  search.addEventListener('input', () => {
+    //searchUser(search.value);
+    let matches = allUsers.filter((user: String) => {
+      let exp = new RegExp(`^${search.value}`, 'gi');
+      return user.match(exp);
+    });
+    if (search.value.length === 0) {
+      matches = [];
+      matchList.innerHTML = ''
+    }
+    outputMatches(matches);
   });
 
+  function outputMatches(matches: string[]) {
+    if (matches.length > 0) {
+      let html = matches.map((match: string) => {
+        return `<div class='card card-body over'>${match}</div>`;
+      }).join('');
+      matchList.innerHTML = html;
+      let userDiv = Array.from(document.getElementsByClassName('over'));
+      userDiv.forEach(div => {
+        div.addEventListener('click', selectClickedUser);
+      });
+    } else {
+      matchList.innerHTML = ''
+    }
+  }
+
+  function selectClickedUser(e: Event) {
+    matchList.innerHTML = '';
+    search.value = '';
+    let values = (<HTMLElement>e.currentTarget).textContent;
+    if (!(selectedUsers.includes(values))) {
+      if (values === sessionStorage.getItem('username')) {
+        (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with yourself";
+      } else if (values === editTodoForm.getAttribute('original-user')) {
+        (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "You cant share the todo with the owner";
+      }
+      else {
+        (<HTMLElement>document.querySelector("#duplicated-user")).textContent = "";
+        selectedUsers.push(values);
+      }
+
+    }
+    displayUsers();
+  }
+  /* /////////////////////////////////// TODO TASKS /////////////////////////////// */
+  addTask.addEventListener('click', function (e: Event) {
+    e.preventDefault();
+    let todoId = editTodoForm.getAttribute('data-note-id');
+    if (newTask.value !== '') {
+      let task: any = {
+        id: new BSON.ObjectId(),
+        task_name: newTask.value,
+        completed: false
+      }
+      newTask.value = '';
+      allTasks.push(task);
+      db.addTaskToTodo(todoId, task)
+        .then(() => {
+          displayTasksInEditForm(todoId);
+          printEveryTodo();
+        })
+    }
+
+  });
+
+}
+/* /////////////////////////////////// GET TASKS FOR A SPECIFIC TODO /////////////////////////////// */
+function displayTasksInEditForm(todoId: any) {
+  db.displayTasksInEditForm(todoId)
+    .then((result: any) => {
+      while (displayTask.firstChild) {
+        displayTask.removeChild(displayTask.firstChild as ChildNode);
+      }
+      if (result.tasks) {
+        console.log(result);
+
+        for (let i = 0; i < result.tasks.length; i++) {
+          let p = document.createElement('p');
+          p.textContent = `${i + 1}. ${result.tasks[i].task_name}`;
+          displayTask.appendChild(p);
+        }
+      }
+    })
+
+}
+/* /////////////////////////////////// GET USERS THAT THE TODO IS SHARED WITH  /////////////////////////////// */
+function displayUsers() {
+  while (chosenUsers.firstChild) {
+    chosenUsers.removeChild(chosenUsers.firstChild as ChildNode);
+  }
+  if (selectedUsers) {
+    for (let i = 0; i < selectedUsers.length; i++) {
+      let span = document.createElement('span');
+      let p = document.createElement('span');
+      span.setAttribute('class', 'mr-1 mb-1 user-par px-1');
+      p.textContent = selectedUsers[i];
+      let button = document.createElement('button');
+      button.setAttribute('class', 'btn mx-1 remove-user-button');
+      button.textContent = 'x';
+      button.setAttribute('type', 'button');
+      button.addEventListener('click', removeSelectedUser)
+      span.appendChild(button);
+      span.appendChild(p);
+      chosenUsers.appendChild(span);
+    };
+  }
+
+}
+/* /////////////////////////////////// REMOVE USERS FROM THE SHARED LIST  /////////////////////////////// */
+function removeSelectedUser(e: Event) {
+  e.preventDefault();
+  let value: any = (<HTMLElement>(<HTMLElement>e.currentTarget).parentNode).childNodes[1].textContent;
+  let index = selectedUsers.indexOf(value);
+  if (index > -1) {
+    selectedUsers.splice(index, 1);
+    displayUsers();
+  }
 }
 
 function printEveryTodo() {
@@ -245,34 +394,58 @@ function printEveryTodo() {
       });
 
     }
+
     db.printTodosByCategory(date, checkedCategory)
       .then((todosByCategory: any) => {
-        let completedTodos: any[] = [];
-        let uncompletedTodos: any[] = [];
-        todosByCategory.forEach((todo: any) => {
-          if (todo.completed) {
-            completedTodos.push(todo);
-          } else {
-            uncompletedTodos.push(todo);
-          }
-        });
-        uncompletedTodos.sort(compare);
-        let newArr = groupBy(uncompletedTodos, 'category_name');
-        completedTodos.sort(compare);
-        let newArr2 = groupBy(completedTodos, 'category_name');
-        addTodosToForm(newArr, notesList, false)
-        addTodosToForm(newArr2, completedNotesList, true)
+        sortTodoByCompletion(todosByCategory);
       })
+
+  }
+  function sortTodoByCompletion(todos: any) {
+    let completedTodos: any[] = [];
+    let uncompletedTodos: any[] = [];
+    todos.forEach((todo: any) => {
+      if (todo.completed) {
+        completedTodos.push(todo);
+      } else {
+        uncompletedTodos.push(todo);
+      }
+    });
+    uncompletedTodos.sort(compare);
+    let newArr = groupBy(uncompletedTodos, 'category_name');
+    completedTodos.sort(compare);
+    let newArr2 = groupBy(completedTodos, 'category_name');
+    addTodosToForm(newArr, notesList, false);
+    addTodosToForm(newArr2, completedNotesList, true);
+    getSharedTodos();
   }
   /* //////////////////////////Call this function when a todo is marked as completed ////////////////////////////// */
   function markCompletedNote(e: Event) {
     let todoId: any = ((<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
     let checked = (<HTMLInputElement>e.target).checked;
     db.markCompletedNote(todoId, checked)
-      .then(() => {
-        specificTodos();
-        //printToDos()
+      .then((completed) => {
+        if (completed) {
+          (<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).style.border = '';
+          specificTodos();
+        } else {
+          (<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).style.border = '0.5px solid red';
+          (<HTMLInputElement>e.target).checked = false;
+        }
       });
+  }
+  function markCompletedTask(e: Event) {
+    let todoId: any = ((<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
+    let taskId: any = (<HTMLElement>e.target).getAttribute('task-id');
+    let checked = (<HTMLInputElement>e.target).checked;
+    db.markCompletedTask(todoId, taskId, checked)
+      .then((completed) => {
+        console.log(completed);
+
+        if (!completed) {
+          specificTodos();
+        }
+      })
   }
   /* //////////////////////////Remove a category////////////////////////////// */
   function deleteCategory(e: Event) {
@@ -436,15 +609,36 @@ function printEveryTodo() {
         description.textContent = todos[key][i].description;
         description.style.padding = '0 18px';
         description.style.borderTop = '0.5px solid black';
+        description.style.borderBottom = '0.5px solid black';
 
         div4.appendChild(description);
         div4.setAttribute('class', 'content mt-2');
 
-        listItem.appendChild(div3);
-        listItem.appendChild(div4);
-        listItem.addEventListener('click', expand);
-        listItem.setAttribute("class", " d-flex flex-column printed-note");
-        listItem.setAttribute('data-note-id', todos[key][i]._id.toString());
+        if (todos[key][i].tasks) {
+          for (let j = 0; j < todos[key][i].tasks.length; j++) {
+            let checkBox = document.createElement('input');
+            let span = document.createElement('span');
+            let par = document.createElement('span');
+            let label = document.createElement('label');
+            let div = document.createElement('div');
+            checkBox.setAttribute("type", "checkbox");
+            checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+            checkBox.setAttribute('task-id', todos[key][i].tasks[j].id.toString());
+            checkBox.addEventListener('click', markCompletedTask);
+            if (todos[key][i].tasks[j].completed === true) {
+              checkBox.checked = true;
+            }
+            span.setAttribute('class', 'checkmark');
+            label.appendChild(checkBox);
+            label.appendChild(span);
+            label.setAttribute("class", "check-label");
+            par.textContent = todos[key][i].tasks[j].task_name;
+            div.appendChild(label);
+            div.appendChild(par);
+            div.setAttribute("class", " d-flex");
+            div4.appendChild(div);
+          }
+        }
 
         // add comment field to 'todo' item
         listItem.appendChild(commentField);
@@ -476,18 +670,111 @@ function printEveryTodo() {
           }
         })
 
+        listItem.appendChild(div3);
+        listItem.appendChild(div4);
+        listItem.addEventListener('click', expand);
+        listItem.setAttribute("class", " d-flex flex-column printed-note");
+        listItem.setAttribute('data-note-id', todos[key][i]._id.toString());
         ul.appendChild(listItem);
       }
       li.appendChild(ul);
       list.appendChild(li);
 
-    }
 
+
+    }
     if (!list.firstChild) {
       let listItem = document.createElement('li');
       listItem.textContent = "No todos stored";
       list.appendChild(listItem);
     }
+  }
+
+  /* //////////////////////// GET SHARED TODOS ////////////////////// */
+  function getSharedTodos() {
+    db.getSharedTodos()
+      .then((todos: any) => {
+        let completedTodos: any[] = [];
+        let uncompletedTodos: any[] = [];
+        todos.forEach((todo: any) => {
+          if (todo.completed) {
+            completedTodos.push(todo);
+          } else {
+            uncompletedTodos.push(todo);
+          }
+        });
+
+        printSharedTodos(uncompletedTodos, notesList, false);
+        printSharedTodos(completedTodos, completedNotesList, true);
+      })
+  }
+
+  function printSharedTodos(todos: any, location: any, isChecked: boolean) {
+    let ul = document.createElement('ul');
+    if (todos.length > 0) ul.textContent = "Shared todos";
+    todos.forEach((todos: any) => {
+      let listItem = document.createElement("li");
+      let checkBox = document.createElement("input");
+      let par = document.createElement("p");
+      let date = document.createElement('span');
+      let div = document.createElement('div');
+      let div2 = document.createElement('div');
+      let div3 = document.createElement('div');
+      let div4 = document.createElement('div');
+      let label = document.createElement('label');
+      let span = document.createElement('span');
+      let description = document.createElement('p');
+      let button = document.createElement("button");
+      //btn.textContent = "x";
+      checkBox.setAttribute("type", "checkbox");
+      checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
+      checkBox.onclick = markCompletedNote;
+      span.setAttribute('class', 'checkmark');
+      if (isChecked) {
+        checkBox.checked = true;
+      }
+      label.appendChild(checkBox);
+      label.appendChild(span);
+      label.setAttribute("class", "check-label");
+      date.textContent = "Due date: " + rearrangeDate(modifyDate(todos.due_date));
+      date.setAttribute('class', 'my-auto');
+      button.setAttribute('class', "btn btn-warning todo-edit-button ml-2 text-center");
+      button.setAttribute('data-toggle', 'modal');
+      button.setAttribute('data-target', '#todoModal');
+      button.textContent = "Edit";
+      button.addEventListener('click', getTodoDetails);
+
+      div.appendChild(date);
+      div.appendChild(button);
+      //div.appendChild(label);
+      div.setAttribute("class", "d-flex justify-content-between");
+
+      par.textContent = todos.todo;
+      par.setAttribute('class', 'my-auto')
+
+      div2.appendChild(label);
+      div2.appendChild(par);
+      div2.setAttribute("class", " d-flex justify-content-between");
+      div3.setAttribute("class", " d-flex justify-content-between mt-1");
+      div3.style.width = '100%'
+      div3.appendChild(div2);
+      //listItem.appendChild(par);
+      div3.appendChild(div);
+      description.textContent = todos.description;
+      description.style.padding = '0 18px';
+      description.style.borderTop = '0.5px solid black';
+
+      div4.appendChild(description);
+      div4.setAttribute('class', 'content mt-2');
+
+      listItem.appendChild(div3);
+      listItem.appendChild(div4);
+      listItem.addEventListener('click', expand);
+      listItem.setAttribute("class", " d-flex flex-column printed-note");
+      listItem.setAttribute('data-note-id', todos._id.toString());
+      ul.appendChild(listItem);
+    });
+    location.appendChild(ul);
   }
 
   /* //////////////////////// GET TODO DETAILS AND PRINT THEM IN THE MODAL ////////////////////// */
@@ -553,8 +840,8 @@ function printEveryTodo() {
     return currDate;
   }
   printToDos();
-
 }
+
 /* //////////////////////////Function used make the checkboxes act like radio inputs////////////////////////////// */
 function selectOnlyThis(e: any) {
   var myCheckbox = document.getElementsByClassName("annoying");
