@@ -327,6 +327,12 @@ class DB {
       console.log(`Failed to add comment: ${err}`);
     }
   }
+
+  fetchComments = async (noteId: string) => {
+    const query = { "_id": { "$eq": new BSON.ObjectId(noteId) } };
+    const resp: any = await todos.findOne(query);
+    return resp.comments;
+  }
 }
 
 export { DB };

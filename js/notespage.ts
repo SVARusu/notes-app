@@ -448,20 +448,29 @@ function printEveryTodo() {
 
         // add comment field to 'todo' item
         listItem.appendChild(commentField);
-        const addCommentButton = commentField.children[2].children[1].lastChild as HTMLButtonElement;
-        const commentInput = commentField.children[1].firstChild as HTMLInputElement;
+        let addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
+        let commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
 
-        addCommentButton.addEventListener('click', () => {
+        addCommentButton.addEventListener('click', async function newCommentHandler() {
           if (commentInput.value === '') {
             addCommentButton.disabled = true;
           } else {
-            db.addComment(
+            await db.addComment(
               todos[key][i]._id.toString(),
               sessionStorage.getItem("loggedUser") as string,
               commentInput.value
             )
+            const newComments = await db.fetchComments(todos[key][i]._id.toString());
             commentInput.value = '';
             addCommentButton.disabled = true;
+
+            // render new comments list
+            const newCommentField = await generateCommentField(newComments);
+            listItem.replaceChild(newCommentField, listItem.children[2])
+
+            addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
+            commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
+            addCommentButton.addEventListener('click', newCommentHandler);
           }
         })
 

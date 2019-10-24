@@ -71,7 +71,6 @@ async function generateCommentField(comments: Icomment[]) {
     e.stopPropagation();
     textInput.style.display = 'block';
     cancelButton.style.display = 'block';
-
   });
 
   // container elements
