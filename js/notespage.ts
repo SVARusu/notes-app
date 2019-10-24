@@ -1,10 +1,10 @@
 import { DB } from './db';
-import { categories } from './stitch/mongodb';
+import {
+  generateCommentField,
+  createCommentElement,
+  newCommentHandler
+} from './components/notecomments';
 const BSON = require('bson');
-
-
-import { generateCommentField, createCommentElement } from './components/notecomments';
-
 const db = new DB();
 
 let newNote: HTMLInputElement = document.querySelector("#new-note") as HTMLInputElement;
@@ -640,41 +640,26 @@ function printEveryTodo() {
           }
         }
 
-        // add comment field to 'todo' item
-        listItem.appendChild(commentField);
-        const addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
-        const commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
-        const commentList = listItem.children[2].children[0] as HTMLUListElement;
-        const numOfComments = listItem.children[2].children[2].children[0] as HTMLElement;
-
-        addCommentButton.addEventListener('click', async function newCommentHandler() {
-          if (commentInput.value === '') {
-            addCommentButton.disabled = true;
-          } else {
-            await db.addComment(
-              todos[key][i]._id.toString(),
-              sessionStorage.getItem("loggedUser") as string,
-              commentInput.value
-            )
-            const newCommentElem = await createCommentElement(
-              commentInput.value,
-              sessionStorage.getItem("loggedUser") as string
-            );
-
-            commentInput.value = '';
-            addCommentButton.disabled = true;
-
-            const commentCount = await db.countComments(todos[key][i]._id.toString());
-            numOfComments.textContent = `${commentCount} comments`;
-            commentList.appendChild(newCommentElem);
-          }
-        })
-
         listItem.appendChild(div3);
         listItem.appendChild(div4);
         listItem.addEventListener('click', expand);
         listItem.setAttribute("class", " d-flex flex-column printed-note");
         listItem.setAttribute('data-note-id', todos[key][i]._id.toString());
+        // add comment field to 'todo' item
+        listItem.appendChild(commentField);
+        const commentInput = listItem.children[2].children[1].firstChild as HTMLInputElement;
+        const addCommentButton = listItem.children[2].children[2].children[1].lastChild as HTMLButtonElement;
+        const numOfComments = listItem.children[2].children[2].children[0] as HTMLElement;
+        const commentList = listItem.children[2].children[0] as HTMLUListElement;
+
+        addCommentButton.addEventListener('click', () => newCommentHandler(
+          commentInput,
+          addCommentButton,
+          todos[key][i]._id.toString(),
+          numOfComments,
+          commentList
+        ));
+
         ul.appendChild(listItem);
       }
       li.appendChild(ul);

@@ -169,4 +169,37 @@ function createFieldControllers(comments: Icomment[]): HTMLElement {
   return field;
 }
 
-export { generateCommentField, createCommentElement };
+async function newCommentHandler(
+  commentInput: HTMLInputElement,
+  addCommentButton: HTMLButtonElement,
+  todoNoteId: string,
+  numOfComments: HTMLElement,
+  commentList: HTMLUListElement
+) {
+  if (commentInput.value === '') {
+    addCommentButton.disabled = true;
+  } else {
+    await db.addComment(
+      todoNoteId,
+      sessionStorage.getItem("loggedUser") as string,
+      commentInput.value
+    )
+    const newCommentElem = await createCommentElement(
+      commentInput.value,
+      sessionStorage.getItem("loggedUser") as string
+    );
+
+    commentInput.value = '';
+    addCommentButton.disabled = true;
+
+    const commentCount = await db.countComments(todoNoteId);
+    numOfComments.textContent = `${commentCount} comments`;
+    commentList.appendChild(newCommentElem);
+  }
+}
+
+export {
+  generateCommentField,
+  createCommentElement,
+  newCommentHandler
+};
