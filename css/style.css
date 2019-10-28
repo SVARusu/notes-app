@@ -199,4 +199,13 @@ input[type="checkbox"] {
   text-align-last: center;
 }
 
-
+/* NOTE COMMENTS COMPONENT */
+.comment-list {
+	list-style: none;
+}
+.comment-content {
+	margin: 0 10px;
+}
+.comment-textinput {
+	width: 100%;
+}

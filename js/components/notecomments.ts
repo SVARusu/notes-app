@@ -49,16 +49,16 @@ async function generateCommentField(comments: Icomment[]) {
 
   numOfComments.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
-    commentsList.style.display === 'none'
-      ? commentsList.style.display = 'block'
-      : commentsList.style.display = 'none'
+    commentsList.classList.toggle('d-none');
   })
 
   cancelButton.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
-    textInput.style.display = 'none';
+
+    textInput.classList.add('d-none');
     textInput.value = '';
-    cancelButton.style.display = 'none';
+
+    cancelButton.classList.add('d-none');
     addButton.disabled = false;
   });
 
@@ -69,8 +69,8 @@ async function generateCommentField(comments: Icomment[]) {
 
   addButton.addEventListener('click', (e: MouseEvent) => {
     e.stopPropagation();
-    textInput.style.display = 'block';
-    cancelButton.style.display = 'block';
+    textInput.classList.remove('d-none');
+    cancelButton.classList.remove('d-none');
   });
 
   // container elements
@@ -83,8 +83,7 @@ async function generateCommentField(comments: Icomment[]) {
 
 async function createCommentsList(comments: Icomment[]) {
   const list = document.createElement('ul');
-  list.style.display = 'none';
-  list.style.listStyle = 'none';
+  list.classList.add('comment-list', 'd-none');
 
   for (let comment of comments) {
     const newComment = document.createElement('li');
@@ -93,8 +92,7 @@ async function createCommentsList(comments: Icomment[]) {
     const username = await db.getUsername(comment.owner_id);
 
     commentOwner.textContent = username;
-    commentOwner.style.marginLeft = '10px';
-    commentOwner.style.marginRight = '10px';
+    commentOwner.classList.add('comment-content');
     commentMessage.textContent = comment.message;
 
     newComment.appendChild(commentOwner);
@@ -114,8 +112,7 @@ async function createCommentElement(message: string, ownerId: string) {
   const username = await db.getUsername(ownerId);
 
   commentOwner.textContent = username;
-  commentOwner.style.marginLeft = '10px';
-  commentOwner.style.marginRight = '10px';
+  commentOwner.classList.add('comment-content');
   commentMessage.textContent = message;
 
   newComment.appendChild(commentOwner);
@@ -132,8 +129,7 @@ function createTextInput(): HTMLElement {
   textInput.setAttribute('type', 'text');
   textInput.setAttribute('id', 'comment-input');
   textInput.setAttribute('placeholder', 'Write a comment...');
-  textInput.style.display = 'none';
-  textInput.style.width = '100%';
+  textInput.classList.add('comment-textinput', 'd-none');
 
   field.appendChild(textInput);
   field.classList.add('d-flex');
@@ -146,15 +142,14 @@ function createFieldControllers(comments: Icomment[]): HTMLElement {
   const numOfComments = document.createElement('span');
 
   numOfComments.textContent = `${comments.length} comments`;
-  numOfComments.style.marginLeft = '10px';
-  numOfComments.style.marginRight = '10px';
+  numOfComments.classList.add('comment-content');
   field.appendChild(numOfComments);
 
   const buttons = document.createElement('div');
 
   const cancelButton = document.createElement('button');
   cancelButton.textContent = 'Cancel';
-  cancelButton.style.display = 'none';
+  cancelButton.classList.add('d-none');
   buttons.appendChild(cancelButton);
 
   const addButton = document.createElement('button');
@@ -200,6 +195,5 @@ async function newCommentHandler(
 
 export {
   generateCommentField,
-  createCommentElement,
   newCommentHandler
 };

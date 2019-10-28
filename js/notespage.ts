@@ -1,7 +1,6 @@
 import { DB } from './db';
 import {
   generateCommentField,
-  createCommentElement,
   newCommentHandler
 } from './components/notecomments';
 const BSON = require('bson');

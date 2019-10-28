@@ -111,7 +111,6 @@ class DB {
       const query = { _id: new BSON.ObjectId(todoId) }
       todos.findOne(query)
         .then(result => {
-          let user: any = result
           if (result) {
             resolve(result);
           } else {
@@ -327,18 +326,16 @@ class DB {
   }
 
   createNewCategory = (category: string, color: string) => {
-    let found = false;
     let newCategory = { owner_id: sessionStorage.getItem("loggedUser"), name: category, color: color, removed: false };
     const query = { owner_id: sessionStorage.getItem("loggedUser"), name: category };
     return new Promise((resolve, reject) => {
       categories.findOne(query)
         .then((result: any) => {
           if (result) {
-            found = true;
-            resolve(found);
+            resolve(true);
           } else {
             console.log("No document matches the provided query.")
-            resolve(found);
+            resolve(false);
             categories.insertOne(newCategory)
               .then((result: { insertedId: any; }) => console.log(`Successfully inserted item with _id: ${result.insertedId}`))
               .catch((err: any) => console.error(`Failed to insert item: ${err}`))
