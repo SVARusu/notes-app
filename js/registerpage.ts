@@ -1,5 +1,5 @@
 import { DB } from './db';
-import { inputValidationRegex } from './utils';
+import { IgeneralError, inputValidationRegex } from './utils';
 const db = new DB();
 
 let validateUsername: HTMLInputElement = document.querySelector("#username") as HTMLInputElement;
@@ -116,8 +116,8 @@ if (form) {
     e.preventDefault();
 
     db.addUser(validateUsername.value, validateEmail.value, validatePassword.value)
-      .then((errorCode) => {
-        generalErrorHandler(errorCode as number);
+      .then((response) => {
+        generalErrorHandler(response as IgeneralError);
       })
   });
 }
@@ -186,16 +186,13 @@ function passwordMatch(password: string, confirmed: string): boolean {
   }
 }
 
-function generalErrorHandler(input: string | number) {
-  if (input === 4) {
-    generalError.textContent = 'Username already exists';
-    generalError.style.visibility = 'visible';
-    submitButton.disabled = true;
-  } else if (input === 'password') {
-    generalError.textContent = 'Passwords do not match';
-    generalError.style.visibility = 'visible';
-    submitButton.disabled = true;
-  } else if (input === 'clear') {
+function generalErrorHandler(input: IgeneralError | string) {
+  if (typeof input === 'string') {
     generalError.style.visibility = 'hidden';
+  } else {
+    if (input.code !== 0) {
+      generalError.textContent = input.message;
+      generalError.style.visibility = 'visible';
+    }
   }
 }
