@@ -52,13 +52,11 @@ class DB {
 
 
     addUser(username: string, email: string, password: string) {
-        let found: boolean = false;
         let newUser = { username: username, password: password, email: email };
         const query = { "username": username }
         return new Promise((resolve, reject) => {
             users.findOne(query)
                 .then(result => {
-                    let user: any = result
                     if (result) {
                         resolve(4); // user already exists
                     } else {
@@ -77,8 +75,8 @@ class DB {
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
     addNewNote(newNote: string, newNoteDescription: string, category: string, color: any, newDate: any) {
         return new Promise((resolve, reject) => {
-            let createTodo = { owner_id: sessionStorage.getItem("loggedUser"), username: sessionStorage.getItem("username"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
-            todos.insertOne(createTodo)
+            let newTodo = { owner_id: sessionStorage.getItem("loggedUser"), username: sessionStorage.getItem("username"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
+            todos.insertOne(newTodo)
                 .then(result => {
                     console.log(`Successfully inserted item with _id: ${result.insertedId}`)
                     resolve();
@@ -230,19 +228,19 @@ class DB {
                                 tasksCompleted = false;
                                 resolve(false);
                             }
-                            if (tasksCompleted) {
-                                const update = { "$set": { completed: checked } };
-                                todos.updateOne(filterDoc, update)
-                                    .then(result => {
-                                        const { matchedCount, modifiedCount } = result;
-                                        if (matchedCount && modifiedCount) {
-                                            console.log(`Successfully updated the item.`);
-                                            resolve(true);
-                                        }
-                                    })
-                                    .catch(err => console.error(`Failed to update the item: ${err}`))
-                            }
                         });
+                        if (tasksCompleted) {
+                            const update = { "$set": { completed: checked } };
+                            todos.updateOne(filterDoc, update)
+                                .then(result => {
+                                    const { matchedCount, modifiedCount } = result;
+                                    if (matchedCount && modifiedCount) {
+                                        console.log(`Successfully updated the item.`);
+                                        resolve(true);
+                                    }
+                                })
+                                .catch(err => console.error(`Failed to update the item: ${err}`))
+                        }
                     } else {
                         console.log("No document matches the provided query.")
 
@@ -276,7 +274,7 @@ class DB {
                         .catch(err => console.error(`Failed to update the item: ${err}`))
                 }
                 console.log(`Successfully updated the item.`);
-                
+
             })
                 .catch(err => console.error(`Failed to update the item: ${err}`))
         });
