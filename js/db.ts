@@ -61,6 +61,7 @@ class DB {
     })
   }
 
+
   addUser(username: string, email: string, password: string) {
     const newUser = { username: username, password: password, email: email };
     const query = { "username": username }
@@ -83,6 +84,10 @@ class DB {
     })
 
   }
+
+
+    /* /////////////////////////////////TODOS /////////////////////////////// */
+    /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
 
   printTodos() {
     return new Promise((resolve, reject) => {
@@ -247,7 +252,6 @@ class DB {
             });
           } else {
             console.log("No document matches the provided query.")
-
           }
         })
         .catch(err => console.error(`Failed to find document: ${err}`))
