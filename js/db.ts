@@ -88,32 +88,6 @@ class DB {
 
     /* /////////////////////////////////TODOS /////////////////////////////// */
     /* ///////////////////////////////// ADD A NEW TODO /////////////////////////////// */
-    addNewNote(newNote: string, newNoteDescription: string, category: string, color: any, newDate: any) {
-        return new Promise((resolve, reject) => {
-            let newTodo = { owner_id: sessionStorage.getItem("loggedUser"), username: sessionStorage.getItem("username"), category_name: category, completed: false, todo: newNote, description: newNoteDescription, due_date: newDate, color: color };
-            todos.insertOne(newTodo)
-                .then(result => {
-                    console.log(`Successfully inserted item with _id: ${result.insertedId}`)
-                    resolve();
-                })
-                .catch(err => console.error(`Failed to insert item: ${err}`))
-        });
-    }
-    addTaskToTodo(todoId: any, tasks: any) {
-        console.log(tasks);
-
-        return new Promise((resolve, reject) => {
-            const query = { _id: new BSON.ObjectId(todoId) };
-            const update = { "$push": { tasks: tasks } };
-            todos.updateOne(query, update)
-                .then(result => {
-                    const { matchedCount, modifiedCount } = result;
-                    if (matchedCount && modifiedCount) {
-                        console.log(`Successfully updated the item.`);
-                        resolve();
-                    }
-                })
-                .catch(err => console.error(`Failed to update the item: ${err}`))
 
   printTodos() {
     return new Promise((resolve, reject) => {
