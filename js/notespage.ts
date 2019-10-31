@@ -3,6 +3,7 @@ import {
   generateCommentField,
   newCommentHandler
 } from './components/notecomments';
+import { generateTasksField } from './components/notetasks';
 const BSON = require('bson');
 const db = new DB();
 
@@ -434,9 +435,9 @@ function printEveryTodo() {
       });
   }
   function markCompletedTask(e: Event) {
-    let todoId: any = ((<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>(<HTMLElement>e.target).parentNode).parentNode).parentNode).parentNode).getAttribute('data-note-id'));
-    let taskId: any = (<HTMLElement>e.target).getAttribute('task-id');
-    let checked = (<HTMLInputElement>e.target).checked;
+    const todoId: any = (e.target as HTMLElement).getAttribute('data-note-id');
+    const taskId: any = (e.target as HTMLElement).getAttribute('task-id');
+    const checked = (e.target as HTMLInputElement).checked;
     db.markCompletedTask(todoId, taskId, checked)
       .then((completed) => {
         console.log(completed);
@@ -614,29 +615,8 @@ function printEveryTodo() {
         div4.setAttribute('class', 'content mt-2');
 
         if (todos[key][i].tasks) {
-          for (let j = 0; j < todos[key][i].tasks.length; j++) {
-            let checkBox = document.createElement('input');
-            let span = document.createElement('span');
-            let par = document.createElement('span');
-            let label = document.createElement('label');
-            let div = document.createElement('div');
-            checkBox.setAttribute("type", "checkbox");
-            checkBox.setAttribute("class", "note-checkbox checkbox checkbox-primary");
-            checkBox.setAttribute('task-id', todos[key][i].tasks[j].id.toString());
-            checkBox.addEventListener('click', markCompletedTask);
-            if (todos[key][i].tasks[j].completed === true) {
-              checkBox.checked = true;
-            }
-            span.setAttribute('class', 'checkmark');
-            label.appendChild(checkBox);
-            label.appendChild(span);
-            label.setAttribute("class", "check-label");
-            par.textContent = todos[key][i].tasks[j].task_name;
-            div.appendChild(label);
-            div.appendChild(par);
-            div.setAttribute("class", " d-flex");
-            div4.appendChild(div);
-          }
+          const tasksField = generateTasksField(todos[key][i], markCompletedTask);
+          div4.appendChild(tasksField);
         }
 
         listItem.appendChild(div3);

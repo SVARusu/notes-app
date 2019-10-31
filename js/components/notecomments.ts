@@ -2,7 +2,7 @@ import { DB } from '../db';
 import { Icomment } from '../utils';
 const db = new DB();
 
-/** Structure of note-comments component
+/** Structure of note-comments
  *  <div>
  *    <ul>
  *      <li>
@@ -85,21 +85,23 @@ async function createCommentsList(comments: Icomment[]) {
   const list = document.createElement('ul');
   list.classList.add('comment-list', 'd-none');
 
-  for (let comment of comments) {
-    const newComment = document.createElement('li');
-    const commentOwner = document.createElement('span');
-    const commentMessage = document.createElement('span');
-    const username = await db.getUsername(comment.owner_id);
+  if (comments !== undefined) {
+    for (let comment of comments) {
+      const newComment = document.createElement('li');
+      const commentOwner = document.createElement('span');
+      const commentMessage = document.createElement('span');
+      const username = await db.getUsername(comment.owner_id);
 
-    commentOwner.textContent = username;
-    commentOwner.classList.add('comment-content');
-    commentMessage.textContent = comment.message;
+      commentOwner.textContent = username;
+      commentOwner.classList.add('comment-content');
+      commentMessage.textContent = comment.message;
 
-    newComment.appendChild(commentOwner);
-    newComment.appendChild(commentMessage);
-    newComment.classList.add('d-flex');
+      newComment.appendChild(commentOwner);
+      newComment.appendChild(commentMessage);
+      newComment.classList.add('d-flex');
 
-    list.appendChild(newComment);
+      list.appendChild(newComment);
+    }
   }
 
   return list;
@@ -141,7 +143,11 @@ function createFieldControllers(comments: Icomment[]): HTMLElement {
   const field = document.createElement('div');
   const numOfComments = document.createElement('span');
 
-  numOfComments.textContent = `${comments.length} comments`;
+  if (comments !== undefined) {
+    numOfComments.textContent = `${comments.length} comments`;
+  } else {
+    numOfComments.textContent = '0 comments';
+  }
   numOfComments.classList.add('comment-content');
   field.appendChild(numOfComments);
 
